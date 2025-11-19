@@ -5,6 +5,7 @@ import com.szx.train.common.resp.CommonResp;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
 import com.szx.train.member.service.IMemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public CommonResp<Long> register(@RequestBody MemberDTO memberDTO){
+    public CommonResp<Long> register(@RequestBody @Valid MemberDTO memberDTO){
         return new CommonResp<>(memberService.register(memberDTO));
     }
 

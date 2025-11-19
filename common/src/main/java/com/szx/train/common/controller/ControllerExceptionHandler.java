@@ -5,6 +5,7 @@ import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.resp.CommonResp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -56,7 +57,10 @@ public class ControllerExceptionHandler {
     @ResponseBody
     public CommonResp exceptionHandler(BindException e) {
         CommonResp commonResp = new CommonResp();
-        log.error("校验异常：{}", e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+
+        for (ObjectError error : e.getBindingResult().getAllErrors()) {
+            log.error("校验异常：{}", error.getDefaultMessage());
+        }
         commonResp.setSuccess(false);
         commonResp.setMessage(e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
         return commonResp;
