@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class LogAspect {
     public LogAspect() {
-        System.out.println("Common LogAspect");
+        log.info("Common LogAspect init");
     }
 
 

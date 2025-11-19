@@ -1,0 +1,16 @@
+package com.szx.train.member.service;
+
+import com.szx.train.member.po.Passenger;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+/**
+ * <p>
+ * 乘车人 服务类
+ * </p>
+ *
+ * @author Ferry
+ * @since 2025-11-19
+ */
+public interface IPassengerService extends IService<Passenger> {
+
+}
