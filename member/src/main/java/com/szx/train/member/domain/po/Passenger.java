@@ -1,4 +1,4 @@
-package com.szx.train.member.po;
+package com.szx.train.member.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

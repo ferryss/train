@@ -1,7 +1,8 @@
 package com.szx.train.member.service;
 
-import com.szx.train.member.po.Member;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.szx.train.member.domain.dto.MemberDTO;
+import com.szx.train.member.domain.po.Member;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IMemberService extends IService<Member> {
 
+    long register(MemberDTO memberDTO);
 }

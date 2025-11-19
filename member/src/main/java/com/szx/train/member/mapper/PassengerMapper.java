@@ -1,6 +1,6 @@
 package com.szx.train.member.mapper;
 
-import com.szx.train.member.po.Passenger;
+import com.szx.train.member.domain.po.Passenger;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

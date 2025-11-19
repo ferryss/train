@@ -1,14 +1,13 @@
 package com.szx.train.member.controller;
 
 
-import com.szx.train.member.po.Member;
+import com.szx.train.common.resp.CommonResp;
+import com.szx.train.member.domain.dto.MemberDTO;
+import com.szx.train.member.domain.po.Member;
 import com.szx.train.member.service.IMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -27,9 +26,13 @@ public class MemberController {
     private final IMemberService memberService;
 
     @GetMapping("/{id}")
-    public Member queryMemberById(@PathVariable Long id){
-        log.info("查询会员信息:{}",id);
-        return memberService.getById(id);
+    public CommonResp<Member> queryMemberById(@PathVariable Long id){
+        return new CommonResp<>(memberService.getById(id));
+    }
+
+    @PostMapping("/register")
+    public CommonResp<Long> register(@RequestBody MemberDTO memberDTO){
+        return new CommonResp<>(memberService.register(memberDTO));
     }
 
 }

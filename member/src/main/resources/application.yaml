@@ -11,7 +11,7 @@ spring:
 
 mybatis-plus:
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 开发时建议开启看SQL
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 开发时建议开启看SQL
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
   global-config:
     db-config:
@@ -23,6 +23,7 @@ mybatis-plus:
 logging:
   level:
     com.szx.train: debug
+    com.szx.train.member.mapper: trace
 
 knife4j:
   enable: true                     # 开启 Knife4j 增强功能（必须）
@@ -31,7 +32,6 @@ knife4j:
     enableFooter: false            # 关闭底部版权信息
     enableSwaggerModels: true
     language: zh-CN                # 中文界面
-  # 分组配置（强烈推荐，多个分组才好用）
   documents:
     - group: 会员服务
       name: member-api

@@ -1,6 +1,6 @@
 package com.szx.train.member.service.impl;
 
-import com.szx.train.member.po.Passenger;
+import com.szx.train.member.domain.po.Passenger;
 import com.szx.train.member.mapper.PassengerMapper;
 import com.szx.train.member.service.IPassengerService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
