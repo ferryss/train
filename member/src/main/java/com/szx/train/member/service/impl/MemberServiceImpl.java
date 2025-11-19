@@ -3,6 +3,7 @@ package com.szx.train.member.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szx.train.common.exception.BusinessException;
+import com.szx.train.common.util.SnowUtil;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
 import com.szx.train.member.mapper.MemberMapper;
@@ -36,7 +37,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
         Member member = new Member();
         member.setMobile(mobile);
-        member.setId(System.currentTimeMillis());
+        member.setId(SnowUtil.getSnowflakeNextId());
         save(member);
 
         return member.getId();
