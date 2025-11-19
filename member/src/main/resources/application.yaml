@@ -9,14 +9,16 @@ logging:
     com.szx.train: debug
 
 knife4j:
-  enable: true
-  openapi:
-    title: 会员接口文档
-    description: 会员接口文档
-    version: v1.0.0
-    group:
-      default:
-        group-name: default
-        api-rule: package
-        api-rule-resources:
-          - com.szx.train.member.controller
+  enable: true                     # 开启 Knife4j 增强功能（必须）
+  production: false                # false 开发环境，true 生产环境会禁用 UI
+  setting:
+    enableFooter: false            # 关闭底部版权信息
+    enableSwaggerModels: true
+    language: zh-CN                # 中文界面
+  # 分组配置（强烈推荐，多个分组才好用）
+  documents:
+    - group: 会员服务
+      name: member-api
+
+
+
