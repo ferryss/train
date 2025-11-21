@@ -25,5 +25,8 @@ public class MemberDTO implements Serializable {
     @NotBlank
     private String mobile;
 
+    @NotBlank
+    private String code;
+
 
 }

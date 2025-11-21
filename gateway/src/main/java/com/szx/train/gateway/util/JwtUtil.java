@@ -1,4 +1,4 @@
-package com.szx.train.common.util;
+package com.szx.train.gateway.util;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;

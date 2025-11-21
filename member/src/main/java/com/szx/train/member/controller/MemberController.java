@@ -4,6 +4,7 @@ package com.szx.train.member.controller;
 import com.szx.train.common.resp.CommonResp;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
+import com.szx.train.member.domain.vo.MemberLoginVO;
 import com.szx.train.member.service.IMemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +33,15 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public CommonResp<Long> register(@RequestBody @Valid MemberDTO memberDTO){
+    public CommonResp<MemberLoginVO> register(@RequestBody @Valid MemberDTO memberDTO){
         return new CommonResp<>(memberService.register(memberDTO));
+    }
+
+    @GetMapping("/code")
+    public CommonResp<String> sendCode(String mobile){
+        //发送验证码
+        log.info("手机号{}的验证码为{}", mobile, 8888);
+        return new CommonResp<>("8888");
     }
 
 }
