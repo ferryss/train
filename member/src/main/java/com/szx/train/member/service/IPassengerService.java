@@ -1,5 +1,6 @@
 package com.szx.train.member.service;
 
+import com.szx.train.member.domain.dto.PassengerDTO;
 import com.szx.train.member.domain.po.Passenger;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IPassengerService extends IService<Passenger> {
 
+    void savePassenger(PassengerDTO passengerDTO);
 }

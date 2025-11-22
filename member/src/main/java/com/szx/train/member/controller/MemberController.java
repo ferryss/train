@@ -1,6 +1,8 @@
 package com.szx.train.member.controller;
 
 
+import cn.hutool.core.util.StrUtil;
+import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.resp.CommonResp;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
@@ -10,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import static com.szx.train.common.exception.BusinessExceptionEnum.MEMBER_MOBILE_BLANK;
 
 /**
  * <p>
@@ -39,6 +43,9 @@ public class MemberController {
 
     @GetMapping("/code")
     public CommonResp<String> sendCode(String mobile){
+        if(StrUtil.isBlank(mobile)){
+            throw new BusinessException(MEMBER_MOBILE_BLANK);
+        }
         //发送验证码
         log.info("手机号{}的验证码为{}", mobile, 8888);
         return new CommonResp<>("8888");

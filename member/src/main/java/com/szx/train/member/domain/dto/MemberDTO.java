@@ -22,10 +22,10 @@ public class MemberDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotBlank
+    @NotBlank(message = "【会员电话】不能为空")
     private String mobile;
 
-    @NotBlank
+    @NotBlank(message = "【会员验证码】不能为空")
     private String code;
 
 

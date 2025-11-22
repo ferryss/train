@@ -39,11 +39,16 @@ public class JwtUtil {
     }
 
     public static boolean validate(String token) {
-        JWT jwt = JWTUtil.parseToken(token).setKey(key.getBytes());
-        // validate包含了verify
-        boolean validate = jwt.validate(0);
-        LOG.info("JWT token校验结果：{}", validate);
-        return validate;
+        try {
+            JWT jwt = JWTUtil.parseToken(token).setKey(key.getBytes());
+            // validate包含了verify
+            boolean validate = jwt.validate(0);
+            LOG.info("JWT token校验结果：{}", validate);
+            return validate;
+        } catch (Exception e) {
+            LOG.error("JWT token校验失败", e);
+            return false;
+        }
     }
 
     public static JSONObject getJSONObject(String token) {
@@ -56,12 +61,12 @@ public class JwtUtil {
         return payloads;
     }
 
-    public static void main(String[] args) {
-        createToken(1L, "123");
-
-        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYmYiOjE2NzY4OTk4MjcsIm1vYmlsZSI6IjEyMyIsImlkIjoxLCJleHAiOjE2NzY4OTk4MzcsImlhdCI6MTY3Njg5OTgyN30.JbFfdeNHhxKhAeag63kifw9pgYhnNXISJM5bL6hM8eU";
-        validate(token);
-
-        getJSONObject(token);
-    }
+//    public static void main(String[] args) {
+//        createToken(1L, "123");
+//
+//        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYmYiOjE2NzY4OTk4MjcsIm1vYmlsZSI6IjEyMyIsImlkIjoxLCJleHAiOjE2NzY4OTk4MzcsImlhdCI6MTY3Njg5OTgyN30.JbFfdeNHhxKhAeag63kifw9pgYhnNXISJM5bL6hM8eU";
+//        validate(token);
+//
+//        getJSONObject(token);
+//    }
 }

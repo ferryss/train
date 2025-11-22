@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @description
  */
 @RestController
-@RequestMapping("/member")
+@RequestMapping
 public class TestController {
 
     private static final Logger log = LoggerFactory.getLogger(TestController.class);
