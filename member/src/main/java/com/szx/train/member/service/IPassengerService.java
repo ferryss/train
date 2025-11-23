@@ -1,11 +1,11 @@
 package com.szx.train.member.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szx.train.member.domain.dto.PassengerDTO;
+import com.szx.train.member.domain.dto.PassengerQueryDTO;
 import com.szx.train.member.domain.po.Passenger;
 import com.szx.train.member.domain.vo.PassengerVO;
-
-import java.util.List;
 
 /**
  * <p>
@@ -21,7 +21,7 @@ public interface IPassengerService extends IService<Passenger> {
 
     void updatePassenger(PassengerDTO passengerDTO);
 
-    List<PassengerVO> queryList();
+    IPage<PassengerVO> queryList(PassengerQueryDTO passengerQueryDTO);
 
     PassengerVO queryById(Long id);
 }

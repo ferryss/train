@@ -1,15 +1,15 @@
 package com.szx.train.member.controller;
 
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.szx.train.common.resp.CommonResp;
 import com.szx.train.member.domain.dto.PassengerDTO;
+import com.szx.train.member.domain.dto.PassengerQueryDTO;
 import com.szx.train.member.domain.vo.PassengerVO;
 import com.szx.train.member.service.IPassengerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>
@@ -39,8 +39,8 @@ public class PassengerController {
     }
 
     @GetMapping("/list")
-    public CommonResp<List<PassengerVO>> queryList(){
-        return new CommonResp<>(passengerService.queryList());
+    public CommonResp<IPage<PassengerVO>> queryList(@Valid PassengerQueryDTO passengerQueryDTO){
+        return new CommonResp<>(passengerService.queryList(passengerQueryDTO));
     }
 
     @DeleteMapping("/{id}")

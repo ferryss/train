@@ -1,6 +1,6 @@
 package com.szx.train.member.domain.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.szx.train.common.req.PageReq;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PassengerDTO  implements Serializable {
+public class PassengerQueryDTO extends PageReq implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,13 +28,13 @@ public class PassengerDTO  implements Serializable {
 
     private Long memberId;
 
-    @NotBlank(message = "【乘车人姓名】不能为空")
+
     private String name;
 
-    @NotBlank(message = "【乘车人身份证号】不能为空")
+
     private String idCard;
 
-    @NotBlank(message = "【乘车人类型】不能为空")
+
     private String type;
 
     private LocalDateTime createTime;
