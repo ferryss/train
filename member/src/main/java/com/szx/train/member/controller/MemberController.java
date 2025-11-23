@@ -6,7 +6,7 @@ import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.resp.CommonResp;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
-import com.szx.train.member.domain.vo.MemberLoginVO;
+import com.szx.train.common.resp.MemberLoginVO;
 import com.szx.train.member.service.IMemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

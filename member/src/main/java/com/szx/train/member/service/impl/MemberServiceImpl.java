@@ -6,7 +6,7 @@ import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.util.JwtUtil;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
-import com.szx.train.member.domain.vo.MemberLoginVO;
+import com.szx.train.common.resp.MemberLoginVO;
 import com.szx.train.member.mapper.MemberMapper;
 import com.szx.train.member.service.IMemberService;
 import lombok.extern.slf4j.Slf4j;

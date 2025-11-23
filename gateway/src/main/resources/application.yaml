@@ -18,8 +18,8 @@ logging:
 szx:
   auth:
     exclude-paths:
-      - /member/register
-      - /member/code
+      - /member/member/register
+      - /member/member/code
 
 
 

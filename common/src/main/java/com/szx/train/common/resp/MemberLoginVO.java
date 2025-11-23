@@ -1,4 +1,4 @@
-package com.szx.train.member.domain.vo;
+package com.szx.train.common.resp;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

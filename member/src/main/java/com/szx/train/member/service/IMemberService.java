@@ -3,7 +3,7 @@ package com.szx.train.member.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
-import com.szx.train.member.domain.vo.MemberLoginVO;
+import com.szx.train.common.resp.MemberLoginVO;
 
 /**
  * <p>

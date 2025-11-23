@@ -1,7 +1,6 @@
 package com.szx.train.member.domain.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +25,7 @@ public class PassengerDTO implements Serializable {
 
     private Long id;
 
-    @NotNull(message = "【相关会员ID】不能为空")
+
     private Long memberId;
 
     @NotBlank(message = "【乘车人姓名】不能为空")

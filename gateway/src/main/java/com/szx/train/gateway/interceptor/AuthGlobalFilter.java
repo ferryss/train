@@ -1,6 +1,7 @@
 package com.szx.train.gateway.interceptor;
 
 
+import cn.hutool.json.JSONObject;
 import com.szx.train.gateway.config.AuthProperties;
 import com.szx.train.gateway.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +39,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             token = list.get(0).substring(7);
         }
         // 3.校验token
-        Long userId = null;
+        JSONObject userInfo = null;
         if(JwtUtil.validate(token)){
-            userId = JwtUtil.getJSONObject(token).getLong("id");
+            userInfo = JwtUtil.getJSONObject(token);
         }else {
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -48,9 +49,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         }
 
         // 4.存入上下文
-        String userIdStr = userId.toString();
+        String userStr = userInfo.toString();
         ServerWebExchange webExchange = exchange.mutate()
-                .request(builder -> builder.header("user-info", userIdStr))
+                .request(builder -> builder.header("user-info", userStr))
                 .build();
 
         // 5.放行

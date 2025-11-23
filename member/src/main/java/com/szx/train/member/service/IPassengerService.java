@@ -1,8 +1,11 @@
 package com.szx.train.member.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.szx.train.member.domain.dto.PassengerDTO;
 import com.szx.train.member.domain.po.Passenger;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.szx.train.member.domain.vo.PassengerVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -15,4 +18,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface IPassengerService extends IService<Passenger> {
 
     void savePassenger(PassengerDTO passengerDTO);
+
+    void updatePassenger(PassengerDTO passengerDTO);
+
+    List<PassengerVO> queryList();
+
+    PassengerVO queryById(Long id);
 }
