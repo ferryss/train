@@ -1,12 +1,11 @@
 package com.szx.train.business.controller.admin;
 
-import com.szx.train.common.context.LoginMemberContext;
-import com.szx.train.common.resp.CommonResp;
-import com.szx.train.common.resp.PageResp;
 import com.szx.train.business.req.TrainQueryReq;
 import com.szx.train.business.req.TrainSaveReq;
 import com.szx.train.business.resp.TrainQueryResp;
 import com.szx.train.business.service.TrainService;
+import com.szx.train.common.resp.CommonResp;
+import com.szx.train.common.resp.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +33,11 @@ public class TrainAdminController {
     public CommonResp<Object> delete(@PathVariable Long id) {
         trainService.delete(id);
         return new CommonResp<>();
+    }
+
+    @GetMapping("/query/{id}")
+    public CommonResp<TrainQueryResp> query(@PathVariable Long id) {
+        return new CommonResp<>(trainService.queryById(id));
     }
 
 }

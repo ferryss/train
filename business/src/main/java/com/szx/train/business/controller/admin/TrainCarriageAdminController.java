@@ -1,12 +1,11 @@
 package com.szx.train.business.controller.admin;
 
-import com.szx.train.common.context.LoginMemberContext;
-import com.szx.train.common.resp.CommonResp;
-import com.szx.train.common.resp.PageResp;
 import com.szx.train.business.req.TrainCarriageQueryReq;
 import com.szx.train.business.req.TrainCarriageSaveReq;
 import com.szx.train.business.resp.TrainCarriageQueryResp;
 import com.szx.train.business.service.TrainCarriageService;
+import com.szx.train.common.resp.CommonResp;
+import com.szx.train.common.resp.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -36,4 +35,8 @@ public class TrainCarriageAdminController {
         return new CommonResp<>();
     }
 
+    @GetMapping("/query/{id}")
+    public CommonResp<TrainCarriageQueryResp> query(@PathVariable Long id) {
+        return new CommonResp<>(trainCarriageService.queryById(id));
+    }
 }

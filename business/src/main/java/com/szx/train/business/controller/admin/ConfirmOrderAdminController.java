@@ -1,12 +1,11 @@
 package com.szx.train.business.controller.admin;
 
-import com.szx.train.common.context.LoginMemberContext;
-import com.szx.train.common.resp.CommonResp;
-import com.szx.train.common.resp.PageResp;
 import com.szx.train.business.req.ConfirmOrderQueryReq;
 import com.szx.train.business.req.ConfirmOrderSaveReq;
 import com.szx.train.business.resp.ConfirmOrderQueryResp;
 import com.szx.train.business.service.ConfirmOrderService;
+import com.szx.train.common.resp.CommonResp;
+import com.szx.train.common.resp.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +33,11 @@ public class ConfirmOrderAdminController {
     public CommonResp<Object> delete(@PathVariable Long id) {
         confirmOrderService.delete(id);
         return new CommonResp<>();
+    }
+
+    @GetMapping("/query/{id}")
+    public CommonResp<ConfirmOrderQueryResp> query(@PathVariable Long id) {
+        return new CommonResp<>(confirmOrderService.queryById(id));
     }
 
 }

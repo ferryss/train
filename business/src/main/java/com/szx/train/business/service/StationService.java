@@ -73,7 +73,7 @@ public class StationService extends ServiceImpl<StationMapper, Station> {
 
     public StationQueryResp queryById(Long id) {
 
-                Station byId = getById(id);
+        Station byId = getById(id);
         if(byId == null){
         return null;
         }
