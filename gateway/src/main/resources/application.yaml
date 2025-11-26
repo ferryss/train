@@ -10,6 +10,10 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/member/**
+        - id: business
+          uri: http://localhost:8082
+          predicates:
+            - Path=/business/**
 
 logging:
   level:
@@ -20,6 +24,9 @@ szx:
     exclude-paths:
       - /member/member/register
       - /member/member/code
+      - /member/test
+      - /business/test
+      - /*/admin
 
 
 

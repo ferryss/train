@@ -1,7 +1,5 @@
 package com.szx.train.business.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.SchemaProperty;
@@ -30,7 +28,6 @@ public class TrainSeat implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @SchemaProperty(name = "id")
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @SchemaProperty(name = "车次编号")
