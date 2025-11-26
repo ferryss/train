@@ -1,0 +1,42 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /business # 访问路径
+spring:
+  application:
+    name: business
+  datasource:
+    url: jdbc:mysql://192.168.100.128:3306/train-business?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: business
+    password: business
+
+mybatis-plus:
+  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 开发时建议开启看SQL
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    db-config:
+      update-strategy: not_null
+      id-type: auto
+  mapper-locations: classpath*:mapper/**/*.xml
+
+
+logging:
+  level:
+    com.szx.train: debug
+    com.szx.train.business.mapper: trace
+
+knife4j:
+  enable: true                     # 开启 Knife4j 增强功能（必须）
+  production: false                # false 开发环境，true 生产环境会禁用 UI
+  setting:
+    enableFooter: false            # 关闭底部版权信息
+    enableSwaggerModels: true
+    language: zh-CN                # 中文界面
+  documents:
+    - group: business服务
+      name: business-api
+
+
+
