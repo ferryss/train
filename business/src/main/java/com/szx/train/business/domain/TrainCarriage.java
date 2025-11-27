@@ -1,5 +1,6 @@
 package com.szx.train.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.SchemaProperty;
@@ -34,6 +35,7 @@ public class TrainCarriage implements Serializable {
     private String trainCode;
 
     @SchemaProperty(name = "厢号")
+    @TableField("`index`")
     private Integer index;
 
     @SchemaProperty(name = "座位类型|枚举[SeatTypeEnum]")
