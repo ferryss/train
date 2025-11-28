@@ -10,6 +10,8 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/train")
 public class TrainAdminController {
@@ -25,7 +27,7 @@ public class TrainAdminController {
 
     @GetMapping("/query-list")
     public CommonResp<PageResp<TrainQueryResp>> queryList(@Valid TrainQueryReq req) {
-        PageResp<TrainQueryResp> list = trainService.queryList(req);
+        PageResp<TrainQueryResp> list = trainService.queryPageList(req);
         return new CommonResp<>(list);
     }
 
@@ -38,6 +40,12 @@ public class TrainAdminController {
     @GetMapping("/query/{id}")
     public CommonResp<TrainQueryResp> query(@PathVariable Long id) {
         return new CommonResp<>(trainService.queryById(id));
+    }
+
+    @GetMapping("/query-all")
+    public CommonResp<List<TrainQueryResp>> queryAll() {
+        List<TrainQueryResp> list = trainService.queryList();
+        return new CommonResp<>(list);
     }
 
 }

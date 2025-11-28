@@ -39,7 +39,7 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
         }
     }
 
-    public PageResp<TrainQueryResp> queryList(TrainQueryReq req) {
+    public PageResp<TrainQueryResp> queryPageList(TrainQueryReq req) {
         IPage<Train> page = new Page<>(req.getPage(), req.getSize());
 
         IPage<Train> list = lambdaQuery()
@@ -79,5 +79,20 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
         }
 
         return BeanUtil.copyProperties(byId, TrainQueryResp.class);
+    }
+
+    public List<TrainQueryResp> queryList() {
+
+        List<Train> list = lambdaQuery()
+                .orderByAsc(Train::getCode)
+                .list();
+
+        if(list.isEmpty()){
+            return null;
+        }
+
+        return list.stream().map(item -> {
+            return BeanUtil.copyProperties(item, TrainQueryResp.class);
+        }).toList();
     }
 }
