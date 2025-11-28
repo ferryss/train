@@ -6,7 +6,7 @@ spring:
   application:
     name: business
   datasource:
-    url: jdbc:mysql://192.168.100.128:3306/train-business?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://192.168.100.128:3306/train-business?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: business
     password: business
@@ -15,6 +15,7 @@ mybatis-plus:
   configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 开发时建议开启看SQL
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+    default-executor-type: batch
   global-config:
     db-config:
       update-strategy: not_null

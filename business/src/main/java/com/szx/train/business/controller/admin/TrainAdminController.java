@@ -1,5 +1,6 @@
 package com.szx.train.business.controller.admin;
 
+import com.szx.train.business.req.TrainGenerateReq;
 import com.szx.train.business.req.TrainQueryReq;
 import com.szx.train.business.req.TrainSaveReq;
 import com.szx.train.business.resp.TrainQueryResp;
@@ -46,6 +47,12 @@ public class TrainAdminController {
     public CommonResp<List<TrainQueryResp>> queryAll() {
         List<TrainQueryResp> list = trainService.queryList();
         return new CommonResp<>(list);
+    }
+
+    @PostMapping("/generate-seat")
+    public CommonResp<Object> generateSeat(@Valid @RequestBody TrainGenerateReq req) {
+        trainService.generateTrainSeat(req);
+        return new CommonResp<>();
     }
 
 }

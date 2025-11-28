@@ -6,7 +6,7 @@ import java.util.List;
 
 public enum SeatColEnum {
 
-    YDZ_A("AAA", "A", "1"),
+    YDZ_A("A", "A", "1"),
     YDZ_C("C", "C", "1"),
     YDZ_D("D", "D", "1"),
     YDZ_F("F", "F", "1"),

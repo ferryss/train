@@ -1,6 +1,5 @@
 package com.szx.train.business.req;
 
-import com.szx.train.common.req.PageReq;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +10,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class TrainQueryReq extends PageReq {
+public class TrainGenerateReq {
 
     @NotBlank
     private String code;
