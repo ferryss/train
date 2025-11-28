@@ -91,8 +91,8 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
             return null;
         }
 
-        return list.stream().map(item -> {
-            return BeanUtil.copyProperties(item, TrainQueryResp.class);
-        }).toList();
+        return list.stream().map(item -> BeanUtil.copyProperties(item, TrainQueryResp.class)).toList();
     }
+
+
 }

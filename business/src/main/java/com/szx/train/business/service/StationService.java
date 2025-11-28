@@ -80,4 +80,19 @@ public class StationService extends ServiceImpl<StationMapper, Station> {
 
         return BeanUtil.copyProperties(byId, StationQueryResp.class);
     }
+
+    public List<StationQueryResp> queryAll() {
+
+        List<Station> list = lambdaQuery()
+                .orderByAsc(Station::getNamePinyin)
+                .list();
+
+        if(list.isEmpty()){
+            return null;
+        }
+
+        return list.stream().map(item -> {
+            return BeanUtil.copyProperties(item, StationQueryResp.class);
+        }).toList();
+    }
 }

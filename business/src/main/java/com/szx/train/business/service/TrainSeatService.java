@@ -2,6 +2,7 @@ package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,9 +44,9 @@ public class TrainSeatService extends ServiceImpl<TrainSeatMapper, TrainSeat> {
         IPage<TrainSeat> page = new Page<>(req.getPage(), req.getSize());
 
         IPage<TrainSeat> list = lambdaQuery()
-            //.eq(LoginMemberContext.getId() != null , TrainSeat::getMemberId, LoginMemberContext.getId())
-            .orderByDesc(TrainSeat::getCreateTime)
-            .page(page);
+                .eq(StrUtil.isNotBlank(req.getTrainCode()), TrainSeat::getTrainCode, req.getTrainCode())
+                .orderByAsc(TrainSeat::getTrainCode, TrainSeat::getCarriageIndex, TrainSeat::getCarriageSeatIndex)
+                .page(page);
 
         if(list.getRecords().isEmpty()){
         return null;
