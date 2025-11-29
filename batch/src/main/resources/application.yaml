@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 8083
   servlet:
-    context-path: /business # 访问路径
+    context-path: /batch # 访问路径
 spring:
   application:
-    name: business
+    name: batch
   datasource:
-    url: jdbc:mysql://192.168.100.128:3306/train-business?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    url: jdbc:mysql://192.168.100.128:3306/train-batch?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: train
     password: train
@@ -36,8 +36,8 @@ knife4j:
     enableSwaggerModels: true
     language: zh-CN                # 中文界面
   documents:
-    - group: business服务
-      name: business-api
+    - group: batch服务
+      name: batch-api
 
 
 
