@@ -2,6 +2,7 @@ package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,12 +15,15 @@ import com.szx.train.business.req.TrainGenerateReq;
 import com.szx.train.business.req.TrainQueryReq;
 import com.szx.train.business.req.TrainSaveReq;
 import com.szx.train.business.resp.TrainQueryResp;
+import com.szx.train.common.exception.BusinessException;
+import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +39,14 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
     private final TrainSeatService trainSeatService;
 
     public void saveTrain(TrainSaveReq req) {
+        //做唯一性判断
+        Train trainDB = lambdaQuery()
+                .eq(Train::getCode, req.getCode())
+                .one();
+        if (ObjectUtil.isNotNull(trainDB)) {
+            throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CODE_UNIQUE_ERROR);
+        }
+
         LocalDateTime now = LocalDateTime.now();
         Train train = BeanUtil.copyProperties(req, Train.class);
         if (ObjectUtil.isNull(train.getId())) {
@@ -103,9 +115,17 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
         return list.stream().map(item -> BeanUtil.copyProperties(item, TrainQueryResp.class)).toList();
     }
 
+    @Transactional
     public void generateTrainSeat(TrainGenerateReq req){
         String code = req.getCode();
         String type = req.getType();
+        //清空当前车次的座位
+        LOG.info("开始删除座位：火车车次为{}", code);
+        trainSeatService.lambdaUpdate()
+                .eq(TrainSeat::getTrainCode, code)
+                .remove();
+
+        LOG.info("开始查询车厢：火车车次为{}", code);
         //查询所有的车厢
         List<TrainCarriage> list = trainCarriageService.lambdaQuery()
                 .eq(TrainCarriage::getTrainCode, code)
@@ -114,8 +134,7 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
         if(list.isEmpty()){
             return;
         }
-
-
+        LOG.info("开始生成座位：火车车次为{}", code);
         ArrayList<TrainSeat> trainSeats = new ArrayList<>();
         //循环所有的车厢
         for(TrainCarriage trainCarriage : list){
@@ -126,7 +145,7 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
             List<SeatColEnum> colsByType = SeatColEnum.getColsByType(seatType);
             int count = 1; //CarriageSeatIndex 车厢座位索引
             LocalDateTime now = LocalDateTime.now();
-            for(int i = 1; i < row + 1; i++){
+            for(int i = 1; i <= row ; i++){
                 for(SeatColEnum col : colsByType){
                     TrainSeat trainSeat = new TrainSeat();
                     //设置属性
@@ -134,8 +153,8 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
                     trainSeat.setTrainCode(code);
                     trainSeat.setCarriageIndex(index);
                     trainSeat.setSeatType(seatType);
-                    String rowString = i < 10 ? "0"+i : String.valueOf(i);
-                    trainSeat.setRow(rowString);
+                    //String rowString = i < 10 ? "0"+i : String.valueOf(i);
+                    trainSeat.setRow(StrUtil.fillBefore(String.valueOf(i), '0', 2));
                     trainSeat.setCol(col.getCode());
                     trainSeat.setCarriageSeatIndex(count++);
                     trainSeat.setCreateTime(now);
@@ -147,6 +166,4 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
         }
         trainSeatService.saveBatch(trainSeats, 500);
     }
-
-
 }

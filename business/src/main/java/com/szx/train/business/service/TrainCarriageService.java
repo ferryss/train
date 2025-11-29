@@ -11,6 +11,8 @@ import com.szx.train.business.mapper.TrainCarriageMapper;
 import com.szx.train.business.req.TrainCarriageQueryReq;
 import com.szx.train.business.req.TrainCarriageSaveReq;
 import com.szx.train.business.resp.TrainCarriageQueryResp;
+import com.szx.train.common.exception.BusinessException;
+import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import org.slf4j.Logger;
@@ -27,6 +29,15 @@ public class TrainCarriageService extends ServiceImpl<TrainCarriageMapper, Train
 
 
     public void saveTrainCarriage(TrainCarriageSaveReq req) {
+        //做唯一性判断
+        TrainCarriage trainCarriageDB = lambdaQuery()
+                .eq(TrainCarriage::getTrainCode, req.getTrainCode())
+                .eq(TrainCarriage::getIndex, req.getIndex())
+                .one();
+        if (ObjectUtil.isNotNull(trainCarriageDB)) {
+            throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR);
+        }
+
         LocalDateTime now = LocalDateTime.now();
         TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
         if (ObjectUtil.isNull(trainCarriage.getId())) {

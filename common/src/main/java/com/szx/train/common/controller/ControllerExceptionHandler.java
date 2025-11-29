@@ -4,6 +4,7 @@ package com.szx.train.common.controller;
 import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.resp.CommonResp;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -63,6 +64,33 @@ public class ControllerExceptionHandler {
         }
         commonResp.setSuccess(false);
         commonResp.setMessage(e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        return commonResp;
+    }
+
+
+    /**
+     * 捕获SQL异常
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    @ResponseBody
+    public CommonResp exceptionHandler(DuplicateKeyException ex){
+        CommonResp commonResp = new CommonResp();
+        commonResp.setSuccess(false);
+        //获取异常信息
+        log.error("异常信息：{}", ex.getMessage());
+        String message = ex.getMessage();
+        //Duplicate entry 'lixi' for key 'employee.idx_username'
+        if(message.contains("Duplicate entry")){
+            String[] split = message.split("Duplicate entry ");
+            String[] split1 = split[1].split("for key");
+            String info = split1[0];
+            String msg = info + "已经存在";
+            commonResp.setMessage(msg);
+            return commonResp;
+        }
+
         return commonResp;
     }
 
