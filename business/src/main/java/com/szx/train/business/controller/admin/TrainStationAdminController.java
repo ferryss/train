@@ -40,4 +40,10 @@ public class TrainStationAdminController {
         return new CommonResp<>(trainStationService.queryById(id));
     }
 
+    @GetMapping("/query")
+    public CommonResp<TrainStationQueryResp> queryByTrainCodeAndIndex(@RequestParam String trainCode,
+                                                   @RequestParam Integer index) {
+        return new CommonResp<>(trainStationService.queryByTrainCodeAndIndex(trainCode, index));
+    }
+
 }

@@ -14,4 +14,6 @@ public class TrainStationQueryReq extends PageReq {
 
     private String trainCode;
 
+    private Integer index;
+
 }

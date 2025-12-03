@@ -65,7 +65,7 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
 
         IPage<Train> list = lambdaQuery()
             //.eq(LoginMemberContext.getId() != null , Train::getMemberId, LoginMemberContext.getId())
-            .orderByDesc(Train::getCreateTime)
+            .orderByAsc(Train::getCode)
             .page(page);
 
         if(list.getRecords().isEmpty()){

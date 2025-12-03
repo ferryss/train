@@ -2,6 +2,7 @@ package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,9 +44,10 @@ public class DailyTrainCarriageService extends ServiceImpl<DailyTrainCarriageMap
         IPage<DailyTrainCarriage> page = new Page<>(req.getPage(), req.getSize());
 
         IPage<DailyTrainCarriage> list = lambdaQuery()
-            //.eq(LoginMemberContext.getId() != null , DailyTrainCarriage::getMemberId, LoginMemberContext.getId())
-            .orderByDesc(DailyTrainCarriage::getCreateTime)
-            .page(page);
+                .eq(req.getDate() != null, DailyTrainCarriage::getDate, req.getDate())
+                .eq(StrUtil.isNotBlank(req.getTrainCode()), DailyTrainCarriage::getTrainCode, req.getTrainCode())
+                .orderByAsc(DailyTrainCarriage::getDate, DailyTrainCarriage::getTrainCode)
+                .page(page);
 
         if(list.getRecords().isEmpty()){
         return null;

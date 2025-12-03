@@ -91,11 +91,19 @@ public class TrainStationService extends ServiceImpl<TrainStationMapper, TrainSt
 
     public TrainStationQueryResp queryById(Long id) {
 
-                TrainStation byId = getById(id);
+        TrainStation byId = getById(id);
         if(byId == null){
         return null;
         }
 
         return BeanUtil.copyProperties(byId, TrainStationQueryResp.class);
+    }
+
+    public TrainStationQueryResp queryByTrainCodeAndIndex(String trainCode, Integer index) {
+        TrainStation one = lambdaQuery()
+                .eq(StrUtil.isNotBlank(trainCode), TrainStation::getTrainCode, trainCode)
+                .eq(index != null, TrainStation::getIndex, index)
+                .one();
+        return BeanUtil.copyProperties(one, TrainStationQueryResp.class);
     }
 }

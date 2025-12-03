@@ -35,6 +35,13 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
+        <!--读取文件-->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>
