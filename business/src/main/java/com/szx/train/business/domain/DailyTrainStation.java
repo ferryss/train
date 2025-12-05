@@ -10,9 +10,9 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Date;
 
 /**
  * <p>
@@ -35,7 +35,7 @@ public class DailyTrainStation implements Serializable {
     private Long id;
 
     @SchemaProperty(name = "日期")
-    private LocalDate date;
+    private Date date;
 
     @SchemaProperty(name = "车次编号")
     private String trainCode;
