@@ -3,6 +3,7 @@ package com.szx.train.batch;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.szx.train"})
 @MapperScan(basePackages = {"com.szx.train.batch.mapper"})
+@EnableFeignClients(basePackages = {"com.szx.train.batch.feign"})
 public class BatchSpringApplication {
     public static void main(String[] args) {
         SpringApplication.run(BatchSpringApplication.class, args);
