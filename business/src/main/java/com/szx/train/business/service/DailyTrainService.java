@@ -1,6 +1,7 @@
 package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -8,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szx.train.business.domain.DailyTrain;
 import com.szx.train.business.domain.Train;
+import com.szx.train.business.domain.TrainStation;
 import com.szx.train.business.mapper.DailyTrainMapper;
 import com.szx.train.business.req.DailyTrainQueryReq;
 import com.szx.train.business.req.DailyTrainSaveReq;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,9 +37,11 @@ public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain>
     @Autowired
     private TrainStationService trainStationService;
     @Autowired
-    private TrainCarriageService trainCarriageService;
+    private DailyTrainStationService dailyTrainStationService;
     @Autowired
-    private TrainSeatService trainSeatService;
+    private DailyTrainCarriageService dailyTrainCarriageService;
+    @Autowired
+    private DailyTrainSeatService dailyTrainSeatService;
 
     public void saveDailyTrain(DailyTrainSaveReq req) {
         LocalDateTime now = LocalDateTime.now();
@@ -104,8 +109,11 @@ public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain>
             LOG.info("没有车次基础数据");
             return;
         }
+        LOG.info("开始生成日期：【{}】车次数据", DateUtil.format(date, "yyyy-MM-dd"));
+        ArrayList<String> trainCodeList = new ArrayList<>();
         // 添加日期字段，并且更新创建时间字段和新增时间字段
         List<DailyTrain> dailyTrainList = trainlist.stream().map(item -> {
+            trainCodeList.add(item.getCode());
             LocalDateTime now = LocalDateTime.now();
             DailyTrain dailyTrain = BeanUtil.copyProperties(item, DailyTrain.class);
             dailyTrain.setId(SnowUtil.getSnowflakeNextId());
@@ -121,23 +129,21 @@ public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain>
         // 保存每日车次数据
         saveBatch(dailyTrainList, 500);
 
-//        // 2.生成每日车次车站数据
-//        // 查询所有车次车站数据
-//        List<TrainStation> trainStationlist = trainStationService.lambdaQuery().list();
-//        // 添加日期字段，并且更新创建时间字段和新增时间字段
-//        List<DailyTrainStation> dailyTrainStationList = trainStationlist.stream().map(item -> {
-//            DailyTrainStation dailyTrainStation = BeanUtil.copyProperties(item, DailyTrainStation.class);
-//            dailyTrainStation.setId(SnowUtil.getSnowflakeNextId());
-//            dailyTrainStation.setDate(date);
-//            dailyTrainStation.setCreateTime(LocalDateTime.now());
-//            dailyTrainStation.setUpdateTime(LocalDateTime.now());
-//            return dailyTrainStation;
-//        }).toList();
-//
-//
-//        // 3.生成每日车次车厢数据
-//
-//        // 4.生成每日车次座位数据
+        for(String trainCode : trainCodeList){
+            // 2.生成每日车站数据
+            dailyTrainStationService.genDaily(date, trainCode);
+            // 3.生成每日车厢数据
+            dailyTrainCarriageService.genDaily(date, trainCode);
+            // 4.生成每日座位数据
+            Long trainStationCount = trainStationService.lambdaQuery()
+                    .eq(TrainStation::getTrainCode, trainCode)
+                    .count();
+            dailyTrainSeatService.genDaily(date, trainCode, trainStationCount);
+        }
+
+        LOG.info("✅结束生成日期：【{}】车次数据", DateUtil.format(date, "yyyy-MM-dd"));
+
+
     }
 
 }

@@ -39,17 +39,17 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
     private final TrainSeatService trainSeatService;
 
     public void saveTrain(TrainSaveReq req) {
-        //做唯一性判断
-        Train trainDB = lambdaQuery()
-                .eq(Train::getCode, req.getCode())
-                .one();
-        if (ObjectUtil.isNotNull(trainDB)) {
-            throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CODE_UNIQUE_ERROR);
-        }
 
         LocalDateTime now = LocalDateTime.now();
         Train train = BeanUtil.copyProperties(req, Train.class);
         if (ObjectUtil.isNull(train.getId())) {
+            //做唯一性判断
+            Train trainDB = lambdaQuery()
+                    .eq(Train::getCode, req.getCode())
+                    .one();
+            if (ObjectUtil.isNotNull(trainDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CODE_UNIQUE_ERROR);
+            }
             train.setId(SnowUtil.getSnowflakeNextId());
             train.setCreateTime(now);
             train.setUpdateTime(now);

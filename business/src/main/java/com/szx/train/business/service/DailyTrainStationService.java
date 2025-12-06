@@ -1,12 +1,14 @@
 package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szx.train.business.domain.DailyTrainStation;
+import com.szx.train.business.domain.TrainStation;
 import com.szx.train.business.mapper.DailyTrainStationMapper;
 import com.szx.train.business.req.DailyTrainStationQueryReq;
 import com.szx.train.business.req.DailyTrainStationSaveReq;
@@ -15,9 +17,12 @@ import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -25,6 +30,8 @@ public class DailyTrainStationService extends ServiceImpl<DailyTrainStationMappe
 
     private static final Logger LOG = LoggerFactory.getLogger(DailyTrainStationService.class);
 
+    @Autowired
+    private TrainStationService trainStationService;
 
     public void saveDailyTrainStation(DailyTrainStationSaveReq req) {
         LocalDateTime now = LocalDateTime.now();
@@ -81,5 +88,36 @@ public class DailyTrainStationService extends ServiceImpl<DailyTrainStationMappe
         }
 
         return BeanUtil.copyProperties(byId, DailyTrainStationQueryResp.class);
+    }
+
+    @Transactional
+    public void genDaily(Date date, String trainCode) {
+        LOG.info("开始生成日期【{}】车次【{}】的站点信息", DateUtil.format(date, "yyyy-MM-dd"), trainCode);
+        List<TrainStation> trainStationList = trainStationService.lambdaQuery()
+                .eq(TrainStation::getTrainCode, trainCode)
+                .orderByAsc(TrainStation::getIndex)
+                .list();
+        if(trainStationList.isEmpty()){
+            LOG.info("该车次没有站点，生成站点信息结束");
+            return;
+        }
+        List<DailyTrainStation> dailyTrainStationList = trainStationList.stream().map(item -> {
+            LocalDateTime now = LocalDateTime.now();
+            DailyTrainStation dailyTrainStation = BeanUtil.copyProperties(item, DailyTrainStation.class);
+            dailyTrainStation.setId(SnowUtil.getSnowflakeNextId());
+            dailyTrainStation.setDate(date);
+            dailyTrainStation.setCreateTime(now);
+            dailyTrainStation.setUpdateTime(now);
+            return dailyTrainStation;
+        }).toList();
+
+        lambdaUpdate()
+                .eq(DailyTrainStation::getDate, date)
+                .eq(DailyTrainStation::getTrainCode, trainCode)
+                .remove();
+
+        saveBatch(dailyTrainStationList);
+
+        LOG.info("✅结束生成日期【{}】车次【{}】的站点信息", DateUtil.format(date, "yyyy-MM-dd"), trainCode);
     }
 }
