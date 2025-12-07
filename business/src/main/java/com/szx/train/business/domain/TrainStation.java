@@ -64,5 +64,8 @@ public class TrainStation implements Serializable {
     @SchemaProperty(name = "修改时间")
     private LocalDateTime updateTime;
 
+    @SchemaProperty(name = "日期偏移")
+    private Integer dayOffset;
+
 
 }

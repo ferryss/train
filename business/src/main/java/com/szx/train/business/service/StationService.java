@@ -28,17 +28,18 @@ public class StationService extends ServiceImpl<StationMapper, Station> {
 
 
     public void saveStation(StationSaveReq req) {
-        //做唯一性判断
-        Station stationDB = lambdaQuery()
-                .eq(Station::getName, req.getName())
-                .one();
-        if (ObjectUtil.isNotNull(stationDB)) {
-            throw new BusinessException(BusinessExceptionEnum.BUSINESS_STATION_NAME_UNIQUE_ERROR);
-        }
 
         LocalDateTime now = LocalDateTime.now();
         Station station = BeanUtil.copyProperties(req, Station.class);
         if (ObjectUtil.isNull(station.getId())) {
+            //做唯一性判断
+            Station stationDB = lambdaQuery()
+                    .eq(Station::getName, req.getName())
+                    .one();
+            if (ObjectUtil.isNotNull(stationDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_STATION_NAME_UNIQUE_ERROR);
+            }
+
             station.setId(SnowUtil.getSnowflakeNextId());
             station.setCreateTime(now);
             station.setUpdateTime(now);

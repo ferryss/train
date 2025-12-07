@@ -29,18 +29,18 @@ public class TrainCarriageService extends ServiceImpl<TrainCarriageMapper, Train
 
 
     public void saveTrainCarriage(TrainCarriageSaveReq req) {
-        //做唯一性判断
-        TrainCarriage trainCarriageDB = lambdaQuery()
-                .eq(TrainCarriage::getTrainCode, req.getTrainCode())
-                .eq(TrainCarriage::getIndex, req.getIndex())
-                .one();
-        if (ObjectUtil.isNotNull(trainCarriageDB)) {
-            throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR);
-        }
-
         LocalDateTime now = LocalDateTime.now();
         TrainCarriage trainCarriage = BeanUtil.copyProperties(req, TrainCarriage.class);
         if (ObjectUtil.isNull(trainCarriage.getId())) {
+            //做唯一性判断
+            TrainCarriage trainCarriageDB = lambdaQuery()
+                    .eq(TrainCarriage::getTrainCode, req.getTrainCode())
+                    .eq(TrainCarriage::getIndex, req.getIndex())
+                    .one();
+            if (ObjectUtil.isNotNull(trainCarriageDB)) {
+                throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR);
+            }
+
             trainCarriage.setId(SnowUtil.getSnowflakeNextId());
             trainCarriage.setCreateTime(now);
             trainCarriage.setUpdateTime(now);
