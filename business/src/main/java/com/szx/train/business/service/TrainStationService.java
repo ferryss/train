@@ -29,24 +29,25 @@ public class TrainStationService extends ServiceImpl<TrainStationMapper, TrainSt
 
 
     public void saveTrainStation(TrainStationSaveReq req) {
-        //做唯一性判断
-        List<TrainStation> trainStationDBlist = lambdaQuery()
-                .eq(TrainStation::getTrainCode, req.getTrainCode())
-                .list();
-        if (trainStationDBlist != null && !trainStationDBlist.isEmpty()) {
-            for(TrainStation trainStationDB : trainStationDBlist){
-                if(trainStationDB.getIndex().equals(req.getIndex())){
-                    throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_STATION_INDEX_UNIQUE_ERROR);
-                }
-                if(trainStationDB.getName().equals(req.getName())){
-                    throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_STATION_NAME_UNIQUE_ERROR);
-                }
-            }
-        }
 
         LocalDateTime now = LocalDateTime.now();
         TrainStation trainStation = BeanUtil.copyProperties(req, TrainStation.class);
         if (ObjectUtil.isNull(trainStation.getId())) {
+            //做唯一性判断
+            List<TrainStation> trainStationDBlist = lambdaQuery()
+                    .eq(TrainStation::getTrainCode, req.getTrainCode())
+                    .list();
+            if (trainStationDBlist != null && !trainStationDBlist.isEmpty()) {
+                for(TrainStation trainStationDB : trainStationDBlist){
+                    if(trainStationDB.getIndex().equals(req.getIndex())){
+                        throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_STATION_INDEX_UNIQUE_ERROR);
+                    }
+                    if(trainStationDB.getName().equals(req.getName())){
+                        throw new BusinessException(BusinessExceptionEnum.BUSINESS_TRAIN_STATION_NAME_UNIQUE_ERROR);
+                    }
+                }
+            }
+
             trainStation.setId(SnowUtil.getSnowflakeNextId());
             trainStation.setCreateTime(now);
             trainStation.setUpdateTime(now);

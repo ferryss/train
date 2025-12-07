@@ -1,10 +1,11 @@
 package com.szx.train.business.resp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class DailyTrainStationQueryResp {
 
@@ -62,6 +63,11 @@ public class DailyTrainStationQueryResp {
      * 里程（公里）|从上一站到本站的距离
      */
     private BigDecimal km;
+
+    /**
+     * 日期偏移
+     */
+    private Integer dayOffset;
 
     /**
      * 新增时间
@@ -171,6 +177,14 @@ public class DailyTrainStationQueryResp {
         this.updateTime = updateTime;
     }
 
+    public Integer getDayOffset() {
+        return dayOffset;
+    }
+
+    public void setDayOffset(Integer dayOffset) {
+        this.dayOffset = dayOffset;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -187,6 +201,7 @@ public class DailyTrainStationQueryResp {
         sb.append(", outTime=").append(outTime);
         sb.append(", stopTime=").append(stopTime);
         sb.append(", km=").append(km);
+        sb.append(", dayOffset=").append(dayOffset);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append("]");

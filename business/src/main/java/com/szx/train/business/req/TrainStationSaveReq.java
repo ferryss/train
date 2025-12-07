@@ -63,6 +63,12 @@ public class TrainStationSaveReq {
     private BigDecimal km;
 
     /**
+     * 日期偏移
+     */
+    @NotNull(message = "【日期偏移】不能为空")
+    private Integer dayOffset;
+
+    /**
      * 新增时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
@@ -162,6 +168,14 @@ public class TrainStationSaveReq {
         this.updateTime = updateTime;
     }
 
+    public Integer getDayOffset() {
+        return dayOffset;
+    }
+
+    public void setDayOffset(Integer dayOffset) {
+        this.dayOffset = dayOffset;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -177,6 +191,7 @@ public class TrainStationSaveReq {
         sb.append(", outTime=").append(outTime);
         sb.append(", stopTime=").append(stopTime);
         sb.append(", km=").append(km);
+        sb.append(", dayOffset=").append(dayOffset);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append("]");

@@ -1,11 +1,11 @@
 package com.szx.train.business.req;
 
-import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.math.BigDecimal;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 public class DailyTrainTicketSaveReq {
 
@@ -124,6 +124,12 @@ public class DailyTrainTicketSaveReq {
      */
     @NotNull(message = "【硬卧票价】不能为空")
     private BigDecimal ywPrice;
+
+    /**
+     * 日期偏移
+     */
+    @NotNull(message = "【日期偏移】不能为空")
+    private Integer dayOffset;
 
     /**
      * 新增时间
@@ -305,6 +311,14 @@ public class DailyTrainTicketSaveReq {
         this.updateTime = updateTime;
     }
 
+    public Integer getDayOffset() {
+        return dayOffset;
+    }
+
+    public void setDayOffset(Integer dayOffset) {
+        this.dayOffset = dayOffset;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -330,6 +344,7 @@ public class DailyTrainTicketSaveReq {
         sb.append(", rwPrice=").append(rwPrice);
         sb.append(", yw=").append(yw);
         sb.append(", ywPrice=").append(ywPrice);
+        sb.append(", dayOffset=").append(dayOffset);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append("]");

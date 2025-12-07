@@ -112,7 +112,7 @@ public class DailyTrainSeatService extends ServiceImpl<DailyTrainSeatMapper, Dai
             dailyTrainSeat.setDate(date);
             dailyTrainSeat.setCreateTime(now);
             dailyTrainSeat.setUpdateTime(now);
-            String sell = StrUtil.fillBefore("", '0', trainStationCount.intValue());
+            String sell = StrUtil.fillBefore("", '0', trainStationCount.intValue()-1);
             dailyTrainSeat.setSell(sell);
             return dailyTrainSeat;
         }).toList();

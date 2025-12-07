@@ -1,10 +1,11 @@
 package com.szx.train.business.resp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class DailyTrainTicketQueryResp {
 
@@ -106,6 +107,11 @@ public class DailyTrainTicketQueryResp {
      * 硬卧票价
      */
     private BigDecimal ywPrice;
+
+    /**
+     * 日期偏移
+     */
+    private Integer dayOffset;
 
     /**
      * 新增时间
@@ -287,6 +293,14 @@ public class DailyTrainTicketQueryResp {
         this.updateTime = updateTime;
     }
 
+    public Integer getDayOffset() {
+        return dayOffset;
+    }
+
+    public void setDayOffset(Integer dayOffset) {
+        this.dayOffset = dayOffset;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -312,6 +326,7 @@ public class DailyTrainTicketQueryResp {
         sb.append(", rwPrice=").append(rwPrice);
         sb.append(", yw=").append(yw);
         sb.append(", ywPrice=").append(ywPrice);
+        sb.append(", dayOffset=").append(dayOffset);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append("]");

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -59,9 +60,12 @@ public class DailyTrainTicketService extends ServiceImpl<DailyTrainTicketMapper,
         IPage<DailyTrainTicket> page = new Page<>(req.getPage(), req.getSize());
 
         IPage<DailyTrainTicket> list = lambdaQuery()
-//            .eq(LoginMemberContext.getId() != null , DailyTrainTicket::getMemberId, LoginMemberContext.getId())
-            .orderByDesc(DailyTrainTicket::getCreateTime)
-            .page(page);
+                .eq(req.getDate() != null, DailyTrainTicket::getDate, req.getDate())
+                .eq(StrUtil.isNotBlank(req.getTrainCode()), DailyTrainTicket::getTrainCode, req.getTrainCode())
+                .eq(StrUtil.isNotBlank(req.getStart()), DailyTrainTicket::getStart, req.getStart())
+                .eq(StrUtil.isNotBlank(req.getEnd()), DailyTrainTicket::getEnd, req.getEnd())
+                .orderByAsc(DailyTrainTicket::getDate, DailyTrainTicket::getTrainCode, DailyTrainTicket::getStartTime)
+                .page(page);
 
         if(list.getRecords().isEmpty()){
         return null;
@@ -140,6 +144,7 @@ public class DailyTrainTicketService extends ServiceImpl<DailyTrainTicketMapper,
                 dailyTrainTicket.setEndPinyin(end.getNamePinyin());
                 dailyTrainTicket.setEndIndex(end.getIndex());
                 dailyTrainTicket.setEndTime(end.getInTime());
+                dailyTrainTicket.setDayOffset(end.getDayOffset() - start.getDayOffset());
                 dailyTrainTicket.setCreateTime(now);
                 dailyTrainTicket.setUpdateTime(now);
 
