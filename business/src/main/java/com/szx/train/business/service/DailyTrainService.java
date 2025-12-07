@@ -16,9 +16,9 @@ import com.szx.train.business.req.DailyTrainSaveReq;
 import com.szx.train.business.resp.DailyTrainQueryResp;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,20 +28,17 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DailyTrainService.class);
 
-    @Autowired
-    private TrainService trainService;
-    @Autowired
-    private TrainStationService trainStationService;
-    @Autowired
-    private DailyTrainStationService dailyTrainStationService;
-    @Autowired
-    private DailyTrainCarriageService dailyTrainCarriageService;
-    @Autowired
-    private DailyTrainSeatService dailyTrainSeatService;
+    private final TrainService trainService;
+    private final TrainStationService trainStationService;
+    private final DailyTrainStationService dailyTrainStationService;
+    private final DailyTrainCarriageService dailyTrainCarriageService;
+    private final DailyTrainSeatService dailyTrainSeatService;
+    private final DailyTrainTicketService dailyTicketService;
 
     public void saveDailyTrain(DailyTrainSaveReq req) {
         LocalDateTime now = LocalDateTime.now();
@@ -139,6 +136,8 @@ public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain>
                     .eq(TrainStation::getTrainCode, trainCode)
                     .count();
             dailyTrainSeatService.genDaily(date, trainCode, trainStationCount);
+            // 5.生成每日车票数据
+            dailyTicketService.genDaily(date, trainCode);
         }
 
         LOG.info("✅结束生成日期：【{}】车次数据", DateUtil.format(date, "yyyy-MM-dd"));

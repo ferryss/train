@@ -53,7 +53,7 @@ public class DailyTrainCarriageService extends ServiceImpl<DailyTrainCarriageMap
         IPage<DailyTrainCarriage> list = lambdaQuery()
                 .eq(req.getDate() != null, DailyTrainCarriage::getDate, req.getDate())
                 .eq(StrUtil.isNotBlank(req.getTrainCode()), DailyTrainCarriage::getTrainCode, req.getTrainCode())
-                .orderByAsc(DailyTrainCarriage::getDate, DailyTrainCarriage::getTrainCode)
+                .orderByAsc(DailyTrainCarriage::getDate, DailyTrainCarriage::getTrainCode, DailyTrainCarriage::getIndex)
                 .page(page);
 
         if(list.getRecords().isEmpty()){

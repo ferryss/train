@@ -53,7 +53,7 @@ public class DailyTrainStationService extends ServiceImpl<DailyTrainStationMappe
         IPage<DailyTrainStation> list = lambdaQuery()
                 .eq(req.getDate() != null, DailyTrainStation::getDate, req.getDate())
                 .eq(StrUtil.isNotBlank(req.getTrainCode()), DailyTrainStation::getTrainCode, req.getTrainCode())
-                .orderByAsc(DailyTrainStation::getDate, DailyTrainStation::getTrainCode)
+                .orderByAsc(DailyTrainStation::getDate, DailyTrainStation::getTrainCode, DailyTrainStation::getIndex)
                 .page(page);
 
         if(list.getRecords().isEmpty()){

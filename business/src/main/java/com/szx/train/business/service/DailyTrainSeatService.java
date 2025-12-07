@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szx.train.business.domain.DailyTrainSeat;
 import com.szx.train.business.domain.TrainSeat;
+import com.szx.train.business.enums.SeatTypeEnum;
 import com.szx.train.business.mapper.DailyTrainSeatMapper;
 import com.szx.train.business.req.DailyTrainSeatQueryReq;
 import com.szx.train.business.req.DailyTrainSeatSaveReq;
@@ -53,7 +54,8 @@ public class DailyTrainSeatService extends ServiceImpl<DailyTrainSeatMapper, Dai
         IPage<DailyTrainSeat> list = lambdaQuery()
                 .eq(req.getDate() != null, DailyTrainSeat::getDate, req.getDate())
                 .eq(StrUtil.isNotBlank(req.getTrainCode()), DailyTrainSeat::getTrainCode, req.getTrainCode())
-                .orderByAsc(DailyTrainSeat::getDate, DailyTrainSeat::getTrainCode)
+                .orderByAsc(DailyTrainSeat::getDate, DailyTrainSeat::getTrainCode,
+                        DailyTrainSeat::getCarriageIndex, DailyTrainSeat::getCarriageSeatIndex)
                 .page(page);
 
         if(list.getRecords().isEmpty()){
@@ -123,5 +125,15 @@ public class DailyTrainSeatService extends ServiceImpl<DailyTrainSeatMapper, Dai
 
         saveBatch(dailyTrainSeatList, 500);
         LOG.info("✅结束生成日期【{}】车次【{}】的每日车座", DateUtil.format(date, "yyyy-MM-dd"), trainCode);
+    }
+
+    public int SeatCount(Date date, String trainCode, SeatTypeEnum seatType){
+        Long count = lambdaQuery()
+                .eq(DailyTrainSeat::getDate, date)
+                .eq(DailyTrainSeat::getTrainCode, trainCode)
+                .eq(DailyTrainSeat::getSeatType, seatType.getCode())
+                .count();
+
+        return count == 0L ? -1 : count.intValue();
     }
 }
