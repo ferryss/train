@@ -22,6 +22,7 @@ spring:
 logging:
   level:
     com.szx.train: debug
+#    org.springframework.cloud.gateway: debug
 
 szx:
   auth:
