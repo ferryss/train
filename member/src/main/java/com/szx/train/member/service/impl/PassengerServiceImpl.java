@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.szx.train.common.context.LoginMemberContext;
+import com.szx.train.common.exception.BusinessException;
+import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.util.SnowUtil;
 import com.szx.train.member.domain.dto.PassengerDTO;
 import com.szx.train.member.domain.dto.PassengerQueryDTO;
@@ -30,6 +32,15 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
 
     @Override
     public void savePassenger(PassengerDTO passengerDTO) {
+        // 数量校验
+        Long count = lambdaQuery()
+                .eq(LoginMemberContext.getId() != null, Passenger::getMemberId, LoginMemberContext.getId())
+                .count();
+        if(count >= 50){
+            throw new BusinessException(BusinessExceptionEnum.MEMBER_PASSENGER_COUNT_EXCEEDING);
+        }
+
+
         passengerDTO.setMemberId(LoginMemberContext.getId());
 
         LocalDateTime now = LocalDateTime.now();
