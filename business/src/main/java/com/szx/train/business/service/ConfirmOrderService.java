@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -14,6 +15,7 @@ import com.szx.train.business.domain.ConfirmOrder;
 import com.szx.train.business.domain.DailyTrain;
 import com.szx.train.business.domain.DailyTrainTicket;
 import com.szx.train.business.enums.ConfirmOrderStatusEnum;
+import com.szx.train.business.enums.SeatTypeEnum;
 import com.szx.train.business.mapper.ConfirmOrderMapper;
 import com.szx.train.business.req.ConfirmOrderDoReq;
 import com.szx.train.business.req.ConfirmOrderQueryReq;
@@ -21,6 +23,8 @@ import com.szx.train.business.req.ConfirmOrderSaveReq;
 import com.szx.train.business.req.ConfirmOrderTicketReq;
 import com.szx.train.business.resp.ConfirmOrderQueryResp;
 import com.szx.train.common.context.LoginMemberContext;
+import com.szx.train.common.exception.BusinessException;
+import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
@@ -98,6 +102,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
     public void doConfirmOrder(ConfirmOrderDoReq  req) {
 
+
         Date date = req.getDate();
         String trainCode = req.getTrainCode();
         String start = req.getStart();
@@ -153,38 +158,46 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         confirmOrder.setCreateTime(nowTime);
         confirmOrder.setUpdateTime(nowTime);
 
-        boolean save = save(confirmOrder);
+        save(confirmOrder);
 
-//        // 拿到余票数量做扣减
-//        Integer ydzCount = trainTicket.getYdz();
-//        Integer edzCount = trainTicket.getEdz();
-//        Integer ywCount = trainTicket.getYw();
-//        Integer rwCount = trainTicket.getYw();
-//        Integer deductYdzCount = ydzCount;
-//        Integer deductEdzCount = edzCount;
-//        Integer deductYwCount = ywCount;
-//        Integer deductRwCount = rwCount;
-//
-//        String code = SeatTypeEnum.YDZ.getCode();
-//        for (ConfirmOrderTicketReq ticket : tickets) {
-//            String seatTypeCode = ticket.getSeatTypeCode();
-//
-//            if(SeatTypeEnum.YDZ.getCode().equals(seatTypeCode)){
-//                deductYdzCount--;
-//            }else if(SeatTypeEnum.EDZ.getCode().equals(seatTypeCode)){
-//                deductEdzCount--;
-//            } else if (SeatTypeEnum.RW.getCode().equals(seatTypeCode)) {
-//                deductRwCount--;
-//            } else if (SeatTypeEnum.YW.getCode().equals(seatTypeCode)) {
-//                deductYwCount--;
-//            }
-//        }
-//
-//        if(deductYdzCount < 0 || deductEdzCount < 0 || deductYwCount < 0 || deductRwCount < 0){
-//            LOG.info("余票不足");
-//
-//            return;
-//        }
+        // 拿到余票数量做预扣减
+        for(ConfirmOrderTicketReq ticket : tickets){
+            SeatTypeEnum seatTypeEnum = EnumUtil.getBy(SeatTypeEnum::getCode, ticket.getSeatTypeCode());
+
+            switch (seatTypeEnum){
+                case YDZ -> {
+                    int reduceCount = trainTicket.getYdz() - 1;
+                    if(reduceCount < 0){
+                        throw new BusinessException(BusinessExceptionEnum.BUSINESS_TICKET_INSUFFICIENT);
+                    }
+                    trainTicket.setYdz(reduceCount);
+                }
+                case EDZ -> {
+                    int reduceCount = trainTicket.getEdz() - 1;
+                    if(reduceCount < 0){
+                        throw new BusinessException(BusinessExceptionEnum.BUSINESS_TICKET_INSUFFICIENT);
+                    }
+                    trainTicket.setEdz(reduceCount);
+                }
+                case RW -> {
+                    int reduceCount = trainTicket.getRw() - 1;
+                    if(reduceCount < 0){
+                        throw new BusinessException(BusinessExceptionEnum.BUSINESS_TICKET_INSUFFICIENT);
+                    }
+                    trainTicket.setRw(reduceCount);
+                }
+                case YW -> {
+                    int reduceCount = trainTicket.getYw() - 1;
+                    if(reduceCount < 0){
+                        throw new BusinessException(BusinessExceptionEnum.BUSINESS_TICKET_INSUFFICIENT);
+                    }
+                    trainTicket.setYw(reduceCount);
+                }
+
+            }
+        }
+
+
 
         // 遍历车厢确定座位
 
