@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
 import com.szx.train.common.resp.MemberLoginVO;
+import com.szx.train.member.domain.vo.PassengerVO;
+
+import java.util.List;
 
 /**
  * <p>
@@ -16,4 +19,6 @@ import com.szx.train.common.resp.MemberLoginVO;
 public interface IMemberService extends IService<Member> {
 
     MemberLoginVO register(MemberDTO memberDTO);
+
+    List<PassengerVO> queryPassenger();
 }

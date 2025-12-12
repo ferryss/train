@@ -7,11 +7,14 @@ import com.szx.train.common.resp.CommonResp;
 import com.szx.train.member.domain.dto.MemberDTO;
 import com.szx.train.member.domain.po.Member;
 import com.szx.train.common.resp.MemberLoginVO;
+import com.szx.train.member.domain.vo.PassengerVO;
 import com.szx.train.member.service.IMemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.szx.train.common.exception.BusinessExceptionEnum.MEMBER_MOBILE_BLANK;
 
@@ -49,6 +52,11 @@ public class MemberController {
         //发送验证码
         log.info("手机号{}的验证码为{}", mobile, 8888);
         return new CommonResp<>("8888");
+    }
+
+    @GetMapping("/passenger")
+    public CommonResp<List<PassengerVO>> queryPassenger(){
+        return new CommonResp<>(memberService.queryPassenger());
     }
 
 }
