@@ -15,6 +15,7 @@ import com.szx.train.business.domain.ConfirmOrder;
 import com.szx.train.business.domain.DailyTrain;
 import com.szx.train.business.domain.DailyTrainTicket;
 import com.szx.train.business.enums.ConfirmOrderStatusEnum;
+import com.szx.train.business.enums.SeatColEnum;
 import com.szx.train.business.enums.SeatTypeEnum;
 import com.szx.train.business.mapper.ConfirmOrderMapper;
 import com.szx.train.business.req.ConfirmOrderDoReq;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -161,6 +163,46 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         save(confirmOrder);
 
         // 拿到余票数量做预扣减
+        reduceCount(tickets, trainTicket);
+
+        // 判断是否选座
+        ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
+        if(StrUtil.isNotBlank(ticketReq0.getSeat())){
+            LOG.info("该购票有选座");
+            List<SeatColEnum> colsByType = SeatColEnum.getColsByType(ticketReq0.getSeatTypeCode());
+            // 选座列表 {A1, C1, D1, F1, A2, C2, D2, F2}
+            ArrayList<String> seatList = new ArrayList<>();
+            for (int i = 1; i <= 2; i++) {
+                for(SeatColEnum col : colsByType){
+                    seatList.add(col.getCode() + i);
+                }
+            }
+            LOG.info("座位列表：{}", seatList);
+            ArrayList<Integer> absoluteSeatIndexList = new ArrayList<>();
+            ArrayList<Integer> seatIndexListList = new ArrayList<>();
+
+            // 获得绝对座位索引
+            for(ConfirmOrderTicketReq ticket : tickets){
+                int absoluteIndex = seatList.indexOf(ticket.getSeat());
+                absoluteSeatIndexList.add(absoluteIndex);
+            }
+            LOG.info("绝对座位索引：{}", absoluteSeatIndexList);
+            // 获得相对座位索引
+            for (Integer absoluteIndex : absoluteSeatIndexList) {
+                int seatIndex = absoluteIndex - absoluteSeatIndexList.get(0);
+                seatIndexListList.add(seatIndex);
+            }
+            LOG.info("相对座位索引：{}", seatIndexListList);
+        }else{
+            LOG.info("该购票无选座");
+        }
+
+        // 遍历车厢确定座位
+
+
+    }
+
+    private static void reduceCount(List<ConfirmOrderTicketReq> tickets, DailyTrainTicket trainTicket) {
         for(ConfirmOrderTicketReq ticket : tickets){
             SeatTypeEnum seatTypeEnum = EnumUtil.getBy(SeatTypeEnum::getCode, ticket.getSeatTypeCode());
 
@@ -193,14 +235,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     }
                     trainTicket.setYw(reduceCount);
                 }
-
             }
         }
-
-
-
-        // 遍历车厢确定座位
-
-
     }
 }
