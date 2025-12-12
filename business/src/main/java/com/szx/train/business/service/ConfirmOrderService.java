@@ -11,9 +11,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.szx.train.business.domain.ConfirmOrder;
-import com.szx.train.business.domain.DailyTrain;
-import com.szx.train.business.domain.DailyTrainTicket;
+import com.szx.train.business.domain.*;
 import com.szx.train.business.enums.ConfirmOrderStatusEnum;
 import com.szx.train.business.enums.SeatColEnum;
 import com.szx.train.business.enums.SeatTypeEnum;
@@ -46,6 +44,8 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
     private final DailyTrainTicketService dailyTrainTicketService;
     private final DailyTrainService dailyTrainService;
+    private final DailyTrainCarriageService dailyTrainCarriageService;
+    private final DailyTrainSeatService dailyTrainSeatService;
 
     public void saveConfirmOrder(ConfirmOrderSaveReq req) {
         LocalDateTime now = LocalDateTime.now();
@@ -178,9 +178,9 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 }
             }
             LOG.info("座位列表：{}", seatList);
-            ArrayList<Integer> absoluteSeatIndexList = new ArrayList<>();
-            ArrayList<Integer> seatIndexListList = new ArrayList<>();
 
+            ArrayList<Integer> absoluteSeatIndexList = new ArrayList<>();
+            ArrayList<Integer> seatOffsetList = new ArrayList<>();
             // 获得绝对座位索引
             for(ConfirmOrderTicketReq ticket : tickets){
                 int absoluteIndex = seatList.indexOf(ticket.getSeat());
@@ -190,19 +190,54 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             // 获得相对座位索引
             for (Integer absoluteIndex : absoluteSeatIndexList) {
                 int seatIndex = absoluteIndex - absoluteSeatIndexList.get(0);
-                seatIndexListList.add(seatIndex);
+                seatOffsetList.add(seatIndex);
             }
-            LOG.info("相对座位索引：{}", seatIndexListList);
+            LOG.info("相对座位索引：{}", seatOffsetList);
+            getSeat(date,
+                    trainCode,
+                    ticketReq0.getSeatTypeCode(),
+                    ticketReq0.getSeat().split("")[0],
+                    seatOffsetList);
+
         }else{
             LOG.info("该购票无选座");
+            for(ConfirmOrderTicketReq ticket : tickets){
+                getSeat(date,
+                        trainCode,
+                        ticket.getSeatTypeCode(),
+                        null,
+                        null);
+            }
         }
 
         // 遍历车厢确定座位
 
+    }
+
+
+    private void getSeat(Date date, String trainCode, String SeatType,
+                                 String colType, ArrayList<Integer> seatOffsetList){
+
+        List<DailyTrainCarriage> dailyTrainCarriageList = dailyTrainCarriageService.lambdaQuery()
+                .eq(DailyTrainCarriage::getDate, date)
+                .eq(DailyTrainCarriage::getTrainCode, trainCode)
+                .eq(DailyTrainCarriage::getSeatType, SeatType)
+                .list();
+        LOG.info("符合要求车厢列表数量：{}", dailyTrainCarriageList.size());
+
+        for(DailyTrainCarriage dailyTrainCarriage : dailyTrainCarriageList){
+            List<DailyTrainSeat> dailyTrainSeatList = dailyTrainSeatService.lambdaQuery()
+                    .eq(DailyTrainSeat::getDate, date)
+                    .eq(DailyTrainSeat::getTrainCode, trainCode)
+                    .eq(DailyTrainSeat::getCarriageIndex, dailyTrainCarriage.getIndex())
+                    .list();
+            LOG.info("车厢 {} 符合要求座位数量：{}", dailyTrainCarriage.getIndex(),
+                    dailyTrainSeatList.size());
+        }
 
     }
 
-    private static void reduceCount(List<ConfirmOrderTicketReq> tickets, DailyTrainTicket trainTicket) {
+    private void reduceCount(List<ConfirmOrderTicketReq> tickets, DailyTrainTicket trainTicket) {
         for(ConfirmOrderTicketReq ticket : tickets){
             SeatTypeEnum seatTypeEnum = EnumUtil.getBy(SeatTypeEnum::getCode, ticket.getSeatTypeCode());
 
