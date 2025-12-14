@@ -1,6 +1,7 @@
 package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -215,8 +216,6 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             }
         }
 
-        // 遍历车厢确定座位
-
     }
 
 
@@ -228,6 +227,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 .eq(DailyTrainCarriage::getDate, date)
                 .eq(DailyTrainCarriage::getTrainCode, trainCode)
                 .eq(DailyTrainCarriage::getSeatType, SeatType)
+                .orderByAsc(DailyTrainCarriage::getIndex)
                 .list();
         LOG.info("符合要求车厢列表数量：{}", dailyTrainCarriageList.size());
 
@@ -236,23 +236,78 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     .eq(DailyTrainSeat::getDate, date)
                     .eq(DailyTrainSeat::getTrainCode, trainCode)
                     .eq(DailyTrainSeat::getCarriageIndex, dailyTrainCarriage.getIndex())
+                    .orderByAsc(DailyTrainSeat::getCarriageSeatIndex)
                     .list();
             LOG.info("车厢 {} 符合要求座位数量：{}", dailyTrainCarriage.getIndex(),
                     dailyTrainSeatList.size());
 
             for(DailyTrainSeat dailyTrainSeat : dailyTrainSeatList){
-                boolean isSell = calSell(dailyTrainSeat, startIndex, endIndex);
-                if(!isSell){
-                    continue;
+
+                Integer curSeatIndex = dailyTrainSeat.getCarriageSeatIndex();
+                String col = dailyTrainSeat.getCol();
+
+
+                // 判断列号是否符合
+                if(StrUtil.isBlank(colType)){
+                    LOG.info("座位 {} 无列号要求", curSeatIndex);
                 }else {
-                    LOG.info("座位行号 {}, 列号 {}", dailyTrainSeat.getRow(), dailyTrainSeat.getCol());
-                    return;
+                    if(!col.equals(colType)){
+                        LOG.info("座位 {} 列号不符合要求, 要求列号: {}, 目标列号: {}", curSeatIndex, colType, col);
+                        continue;
+                    }
                 }
 
+                boolean isSell = calSell(dailyTrainSeat, startIndex, endIndex);
+                if(!isSell){
+                    LOG.info("座位 {} 已被卖", curSeatIndex);
+                    continue;
+                }else {
+                    LOG.info("座位 {} 被选行号 {}, 列号 {}", curSeatIndex,
+                            dailyTrainSeat.getRow(), dailyTrainSeat.getCol());
+                }
+
+                boolean isContinueCal = true;
+
+                // 判断偏移列表是否空
+                if(CollUtil.isNotEmpty(seatOffsetList)){
+                    LOG.info("该座位有偏移列表 {}", seatOffsetList );
+                    for (int i = 1; i < seatOffsetList.size(); i++) {
+
+                        int nextIndex =  curSeatIndex + seatOffsetList.get(i) - 1;
+                        if(nextIndex >= dailyTrainSeatList.size()){
+                            LOG.info("座位偏移超出范围");
+                            isContinueCal = false;
+                            break;
+                        }
+
+                        DailyTrainSeat offsetTrainSeat = dailyTrainSeatList.get(nextIndex);
+                        Integer offsetSeatIndex = offsetTrainSeat.getCarriageSeatIndex();
+
+                        boolean isOffsetSell = calSell(offsetTrainSeat, startIndex, endIndex);
+                        if(!isOffsetSell){
+                            LOG.info("偏移座位 {} 已被卖", offsetSeatIndex);
+                            isContinueCal = false;
+                            break;
+                        }else {
+                            LOG.info("座位 {} 被选行号 {}, 列号 {}", offsetSeatIndex,
+                                    offsetTrainSeat.getRow(), offsetTrainSeat.getCol());
+                        }
+                    }
+                }
+
+                if(!isContinueCal){
+                    LOG.info("该座位 {} 的偏移列表无法继续计算, 开启下个座位计算", curSeatIndex);
+                    continue;
+                }
+
+
+                // 保存座位信息
+
+
+                return;
+
             }
-
         }
-
     }
 
     private boolean calSell(DailyTrainSeat dailyTrainSeat, int startIndex, int endIndex){
