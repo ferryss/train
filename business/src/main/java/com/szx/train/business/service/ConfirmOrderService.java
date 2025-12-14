@@ -167,6 +167,9 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         // 拿到余票数量做预扣减
         reduceCount(tickets, trainTicket);
 
+        // 最终选票列表
+        ArrayList<DailyTrainSeat> finalSeatList = new ArrayList<>();
+
         // 判断是否选座
         ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
         if(StrUtil.isNotBlank(ticketReq0.getSeat())){
@@ -195,7 +198,8 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 seatOffsetList.add(seatIndex);
             }
             LOG.info("相对座位索引：{}", seatOffsetList);
-            getSeat(date,
+            getSeat(finalSeatList,
+                    date,
                     trainCode,
                     ticketReq0.getSeatTypeCode(),
                     ticketReq0.getSeat().split("")[0],
@@ -206,7 +210,8 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         }else{
             LOG.info("该购票无选座");
             for(ConfirmOrderTicketReq ticket : tickets){
-                getSeat(date,
+                getSeat(finalSeatList,
+                        date,
                         trainCode,
                         ticket.getSeatTypeCode(),
                         null,
@@ -216,12 +221,18 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             }
         }
 
+        LOG.info("最终选座列表：{}", finalSeatList);
+
     }
 
 
-    private void getSeat(Date date, String trainCode, String SeatType,
+    private void getSeat(ArrayList<DailyTrainSeat> finalSeatList,
+                         Date date, String trainCode, String SeatType,
                          String colType, ArrayList<Integer> seatOffsetList,
                          Integer startIndex, Integer endIndex){
+
+        // offset临时存储座位列表
+        ArrayList<DailyTrainSeat> tempSeatList = new ArrayList<>();
 
         List<DailyTrainCarriage> dailyTrainCarriageList = dailyTrainCarriageService.lambdaQuery()
                 .eq(DailyTrainCarriage::getDate, date)
@@ -232,6 +243,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         LOG.info("符合要求车厢列表数量：{}", dailyTrainCarriageList.size());
 
         for(DailyTrainCarriage dailyTrainCarriage : dailyTrainCarriageList){
+
             List<DailyTrainSeat> dailyTrainSeatList = dailyTrainSeatService.lambdaQuery()
                     .eq(DailyTrainSeat::getDate, date)
                     .eq(DailyTrainSeat::getTrainCode, trainCode)
@@ -241,11 +253,25 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             LOG.info("车厢 {} 符合要求座位数量：{}", dailyTrainCarriage.getIndex(),
                     dailyTrainSeatList.size());
 
+
             for(DailyTrainSeat dailyTrainSeat : dailyTrainSeatList){
 
                 Integer curSeatIndex = dailyTrainSeat.getCarriageSeatIndex();
                 String col = dailyTrainSeat.getCol();
 
+                // 座位是否已预选
+                boolean isAlreadyChoose = false;
+                // 判断座位是否预选定
+                for(DailyTrainSeat finalSeat : finalSeatList){
+                    if(curSeatIndex.equals(finalSeat.getCarriageSeatIndex())){
+                        LOG.info("座位 {} 已被预选", curSeatIndex);
+                        isAlreadyChoose = true;
+                        break;
+                    }
+                }
+                if(isAlreadyChoose){
+                    continue;
+                }
 
                 // 判断列号是否符合
                 if(StrUtil.isBlank(colType)){
@@ -257,6 +283,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     }
                 }
 
+                // 判断座位是否可卖
                 boolean isSell = calSell(dailyTrainSeat, startIndex, endIndex);
                 if(!isSell){
                     LOG.info("座位 {} 已被卖", curSeatIndex);
@@ -264,6 +291,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 }else {
                     LOG.info("座位 {} 被选行号 {}, 列号 {}", curSeatIndex,
                             dailyTrainSeat.getRow(), dailyTrainSeat.getCol());
+                    tempSeatList.add(dailyTrainSeat);
                 }
 
                 boolean isContinueCal = true;
@@ -271,6 +299,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 // 判断偏移列表是否空
                 if(CollUtil.isNotEmpty(seatOffsetList)){
                     LOG.info("该座位有偏移列表 {}", seatOffsetList );
+
                     for (int i = 1; i < seatOffsetList.size(); i++) {
 
                         int nextIndex =  curSeatIndex + seatOffsetList.get(i) - 1;
@@ -291,21 +320,21 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                         }else {
                             LOG.info("座位 {} 被选行号 {}, 列号 {}", offsetSeatIndex,
                                     offsetTrainSeat.getRow(), offsetTrainSeat.getCol());
+                            tempSeatList.add(offsetTrainSeat);
                         }
                     }
                 }
 
                 if(!isContinueCal){
                     LOG.info("该座位 {} 的偏移列表无法继续计算, 开启下个座位计算", curSeatIndex);
+                    tempSeatList.clear();
                     continue;
                 }
 
-
                 // 保存座位信息
-
+                finalSeatList.addAll(tempSeatList);
 
                 return;
-
             }
         }
     }
