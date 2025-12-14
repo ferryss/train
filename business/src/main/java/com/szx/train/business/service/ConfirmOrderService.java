@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -197,7 +198,9 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     trainCode,
                     ticketReq0.getSeatTypeCode(),
                     ticketReq0.getSeat().split("")[0],
-                    seatOffsetList);
+                    seatOffsetList,
+                    trainTicket.getStartIndex(),
+                    trainTicket.getEndIndex());
 
         }else{
             LOG.info("该购票无选座");
@@ -206,7 +209,9 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                         trainCode,
                         ticket.getSeatTypeCode(),
                         null,
-                        null);
+                        null,
+                        trainTicket.getStartIndex(),
+                        trainTicket.getEndIndex());
             }
         }
 
@@ -216,7 +221,8 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
 
     private void getSeat(Date date, String trainCode, String SeatType,
-                                 String colType, ArrayList<Integer> seatOffsetList){
+                         String colType, ArrayList<Integer> seatOffsetList,
+                         Integer startIndex, Integer endIndex){
 
         List<DailyTrainCarriage> dailyTrainCarriageList = dailyTrainCarriageService.lambdaQuery()
                 .eq(DailyTrainCarriage::getDate, date)
@@ -233,6 +239,45 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     .list();
             LOG.info("车厢 {} 符合要求座位数量：{}", dailyTrainCarriage.getIndex(),
                     dailyTrainSeatList.size());
+
+            for(DailyTrainSeat dailyTrainSeat : dailyTrainSeatList){
+                boolean isSell = calSell(dailyTrainSeat, startIndex, endIndex);
+                if(!isSell){
+                    continue;
+                }else {
+                    LOG.info("座位行号 {}, 列号 {}", dailyTrainSeat.getRow(), dailyTrainSeat.getCol());
+                    return;
+                }
+
+            }
+
+        }
+
+    }
+
+    private boolean calSell(DailyTrainSeat dailyTrainSeat, int startIndex, int endIndex){
+
+        String sell = dailyTrainSeat.getSell();
+        int length = sell.length();
+        String sellPart = sell.substring(startIndex, endIndex);
+        if(Integer.parseInt(sellPart) > 0){
+            // 不可卖
+            return false;
+        }else{
+            // 可卖
+            sellPart = sellPart.replace("0", "1");
+            sellPart = StrUtil.fillBefore(sellPart, '0', endIndex);
+            sellPart = StrUtil.fillAfter(sellPart, '0', length);
+
+            int newSell = NumberUtil.binaryToInt(sellPart) | NumberUtil.binaryToInt(sell);
+            String newSellStr = NumberUtil.getBinaryStr(newSell);
+            newSellStr = StrUtil.fillBefore(newSellStr, '0', length);
+
+            LOG.info("座位{}被选中， 原售票信息:{}, 车站区间: {}~{}, 即: {}, 最终售票信息: {}",
+                    dailyTrainSeat.getCarriageSeatIndex(), sell, startIndex, endIndex,
+                    sellPart, newSellStr);
+            dailyTrainSeat.setSell(newSellStr);
+            return true;
         }
 
     }
