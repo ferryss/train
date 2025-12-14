@@ -31,7 +31,9 @@ import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,6 +52,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
     private final DailyTrainSeatService dailyTrainSeatService;
 
     public void saveConfirmOrder(ConfirmOrderSaveReq req) {
+
         LocalDateTime now = LocalDateTime.now();
         ConfirmOrder confirmOrder = BeanUtil.copyProperties(req, ConfirmOrder.class);
         if (ObjectUtil.isNull(confirmOrder.getId())) {
@@ -222,6 +225,26 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         }
 
         LOG.info("最终选座列表：{}", finalSeatList);
+
+        // 修改数据库
+        // 1.每日座位表销售情况修改
+        // 2.对应余票剩余数量修改
+        // 3.确认订单表状态修改
+        // 4.用户的车票新增
+        // 也可以单独创建一个类来调用此方法
+        ConfirmOrderService proxy = (ConfirmOrderService) AopContext.currentProxy();
+        proxy.afterDoConfirmOrder(finalSeatList);
+
+    }
+
+    @Transactional
+    public void afterDoConfirmOrder(ArrayList<DailyTrainSeat> finalSeatList){
+        for (DailyTrainSeat dailyTrainSeat : finalSeatList){
+            dailyTrainSeatService.lambdaUpdate()
+                    .set(StrUtil.isNotBlank(dailyTrainSeat.getSell()), DailyTrainSeat::getSell, dailyTrainSeat.getSell())
+                    .eq(dailyTrainSeat.getId() != null, DailyTrainSeat::getId, dailyTrainSeat.getId())
+                    .update();
+        }
 
     }
 
