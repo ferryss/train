@@ -30,6 +30,7 @@ szx:
       - /member/member/register
       - /member/member/code
       - /member/test
+      - /member/admin/**
       - /business/test
       - /business/admin/**
       - /batch/test

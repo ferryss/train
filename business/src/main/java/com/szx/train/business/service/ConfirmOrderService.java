@@ -17,6 +17,7 @@ import com.szx.train.business.domain.*;
 import com.szx.train.business.enums.ConfirmOrderStatusEnum;
 import com.szx.train.business.enums.SeatColEnum;
 import com.szx.train.business.enums.SeatTypeEnum;
+import com.szx.train.business.feign.MemberFeign;
 import com.szx.train.business.mapper.ConfirmOrderMapper;
 import com.szx.train.business.req.ConfirmOrderDoReq;
 import com.szx.train.business.req.ConfirmOrderQueryReq;
@@ -26,6 +27,8 @@ import com.szx.train.business.resp.ConfirmOrderQueryResp;
 import com.szx.train.common.context.LoginMemberContext;
 import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.exception.BusinessExceptionEnum;
+import com.szx.train.common.req.TicketReq;
+import com.szx.train.common.resp.CommonResp;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +39,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +55,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
     private final DailyTrainService dailyTrainService;
     private final DailyTrainCarriageService dailyTrainCarriageService;
     private final DailyTrainSeatService dailyTrainSeatService;
+    private final MemberFeign memberFeign;
 
     public void saveConfirmOrder(ConfirmOrderSaveReq req) {
 
@@ -115,6 +121,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         String start = req.getStart();
         String end = req.getEnd();
         List<ConfirmOrderTicketReq> tickets = req.getTickets();
+        Long memberId = req.getMemberId();
 
         // 校验
         // 车次是否在有效时间内
@@ -229,23 +236,117 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         // 修改数据库
         // 1.每日座位表销售情况修改
         // 2.对应余票剩余数量修改
-        // 3.确认订单表状态修改
+        // //TODO 3.确认订单表状态修改
         // 4.用户的车票新增
         // 也可以单独创建一个类来调用此方法
+
+        List<DailyTrainTicket> ticketList = dailyTrainTicketService.lambdaQuery()
+                .eq(date != null, DailyTrainTicket::getDate, date)
+                .eq(StrUtil.isNotBlank(trainCode), DailyTrainTicket::getTrainCode, trainCode)
+                .list();
         ConfirmOrderService proxy = (ConfirmOrderService) AopContext.currentProxy();
-        proxy.afterDoConfirmOrder(finalSeatList);
+        proxy.afterDoConfirmOrder(finalSeatList, ticketList, tickets, start, end);
 
     }
 
     @Transactional
-    public void afterDoConfirmOrder(ArrayList<DailyTrainSeat> finalSeatList){
-        for (DailyTrainSeat dailyTrainSeat : finalSeatList){
+    public void afterDoConfirmOrder(ArrayList<DailyTrainSeat> finalSeatList, List<DailyTrainTicket> ticketList,
+                                    List<ConfirmOrderTicketReq> tickets,
+                                    String start, String end){
+        for (int i = 0; i < finalSeatList.size(); i++){
+            DailyTrainSeat finalSeat = finalSeatList.get(i);
+            DateTime now = DateTime.now();
+            // 每日座位表销售情况修改
             dailyTrainSeatService.lambdaUpdate()
-                    .set(StrUtil.isNotBlank(dailyTrainSeat.getSell()), DailyTrainSeat::getSell, dailyTrainSeat.getSell())
-                    .eq(dailyTrainSeat.getId() != null, DailyTrainSeat::getId, dailyTrainSeat.getId())
+                    .set(StrUtil.isNotBlank(finalSeat.getSell()), DailyTrainSeat::getSell, finalSeat.getSell())
+                    .set(StrUtil.isNotBlank(finalSeat.getSell()), DailyTrainSeat::getUpdateTime, now)
+                    .eq(finalSeat.getId() != null, DailyTrainSeat::getId, finalSeat.getId())
                     .update();
+
+            String sell = finalSeat.getSell();
+            String seatType = finalSeat.getSeatType();
+            int[] prefixIndex = getPrefixIndex(sell);
+
+            LocalTime startTime = null;
+            LocalTime endTime = null;
+
+            // 每日余票数量修改
+            for(DailyTrainTicket ticket : ticketList){
+                if(ticket.getStart().equals(start)){
+                    startTime = ticket.getStartTime();
+                }
+                if(ticket.getEnd().equals(end)){
+                    endTime = ticket.getEndTime();
+                }
+
+                Integer startIndex = ticket.getStartIndex();
+                Integer endIndex = ticket.getEndIndex();
+                if(prefixIndex[endIndex] - prefixIndex[startIndex] > 0){ //为0说明该区间的票不受影响
+                    switch (seatType) {
+                        case "1":
+                            dailyTrainTicketService.lambdaUpdate()
+                                    .set(DailyTrainTicket::getYdz, ticket.getYdz()-1)
+                                    .eq(ticket.getId() != null, DailyTrainTicket::getId, ticket.getId())
+                                    .update();
+                            break;
+
+                        case "2":
+                            dailyTrainTicketService.lambdaUpdate()
+                                    .set(DailyTrainTicket::getEdz, ticket.getEdz()-1)
+                                    .eq(ticket.getId() != null, DailyTrainTicket::getId, ticket.getId())
+                                    .update();
+                            break;
+                    }
+                }
+            }
+
+            // 乘车人的信息
+            ConfirmOrderTicketReq ticket= tickets.get(i);
+
+            // 用户的车票新增
+            TicketReq ticketReq = new TicketReq();
+            ticketReq.setMemberId(LoginMemberContext.getId());
+            ticketReq.setPassengerId(ticket.getPassengerId());
+            ticketReq.setPassengerName(ticket.getPassengerName());
+            ticketReq.setDate(finalSeat.getDate());
+            ticketReq.setTrainCode(finalSeat.getTrainCode());
+            ticketReq.setCarriageIndex(finalSeat.getCarriageIndex());
+            ticketReq.setRow(finalSeat.getRow());
+            ticketReq.setCol(finalSeat.getCol());
+            ticketReq.setStart(start);
+            ticketReq.setStartTime(startTime);
+            ticketReq.setEnd(end);
+            ticketReq.setEndTime(endTime);
+            ticketReq.setSeatType(finalSeat.getSeatType());
+            CommonResp<Object> objectCommonResp = memberFeign.saveTicket(ticketReq);
+            LOG.info("用户车票新增：{}", ticketReq);
+            LOG.info("用户车票新增结果(调用member)：{}", objectCommonResp);
+
         }
 
+    }
+
+    private int[] getPrefixIndex(String sell){
+        int n = sell.length();
+
+        int[] bitmap = new int[n];
+        for (int i = 0; i < n; i++) {
+            char c = sell.charAt(i);
+            if (c == '0') {
+                bitmap[i] = 0;
+            } else {
+                bitmap[i] = 1;
+            }
+        }
+        LOG.info("销售情况：{}", Arrays.toString(bitmap));
+
+        int[] prefix = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            prefix[i + 1] = prefix[i] + bitmap[i];
+        }
+        LOG.info("站序前缀和：{}", Arrays.toString(prefix));
+
+        return prefix;
     }
 
 

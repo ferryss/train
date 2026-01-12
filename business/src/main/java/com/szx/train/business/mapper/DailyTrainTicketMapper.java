@@ -1,7 +1,7 @@
 package com.szx.train.business.mapper;
 
-import com.szx.train.business.domain.DailyTrainTicket;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szx.train.business.domain.DailyTrainTicket;
 
 /**
  * <p>
@@ -12,5 +12,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2025-11-26
  */
 public interface DailyTrainTicketMapper extends BaseMapper<DailyTrainTicket> {
+
+
+
 
 }
