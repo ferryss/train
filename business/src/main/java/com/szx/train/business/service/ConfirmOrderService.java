@@ -236,8 +236,8 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
         // 修改数据库
         // 1.每日座位表销售情况修改
         // 2.对应余票剩余数量修改
-        // //TODO 3.确认订单表状态修改
-        // 4.用户的车票新增
+        // 3.用户的车票新增
+        // 4.确认订单表状态修改
         // 也可以单独创建一个类来调用此方法
 
         List<DailyTrainTicket> ticketList = dailyTrainTicketService.lambdaQuery()
@@ -245,14 +245,14 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 .eq(StrUtil.isNotBlank(trainCode), DailyTrainTicket::getTrainCode, trainCode)
                 .list();
         ConfirmOrderService proxy = (ConfirmOrderService) AopContext.currentProxy();
-        proxy.afterDoConfirmOrder(finalSeatList, ticketList, tickets, start, end);
+        proxy.afterDoConfirmOrder(finalSeatList, ticketList, tickets, start, end, confirmOrder);
 
     }
 
     @Transactional
     public void afterDoConfirmOrder(ArrayList<DailyTrainSeat> finalSeatList, List<DailyTrainTicket> ticketList,
                                     List<ConfirmOrderTicketReq> tickets,
-                                    String start, String end){
+                                    String start, String end, ConfirmOrder confirmOrder){
         for (int i = 0; i < finalSeatList.size(); i++){
             DailyTrainSeat finalSeat = finalSeatList.get(i);
             DateTime now = DateTime.now();
@@ -301,7 +301,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             }
 
             // 乘车人的信息
-            ConfirmOrderTicketReq ticket= tickets.get(i);
+            ConfirmOrderTicketReq ticket = tickets.get(i);
 
             // 用户的车票新增
             TicketReq ticketReq = new TicketReq();
@@ -322,6 +322,12 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             LOG.info("用户车票新增：{}", ticketReq);
             LOG.info("用户车票新增结果(调用member)：{}", objectCommonResp);
 
+
+            // 确认订单表状态修改
+            lambdaUpdate()
+                    .set(ConfirmOrder::getStatus, ConfirmOrderStatusEnum.SUCCESS.getCode())
+                    .eq(ConfirmOrder::getId, confirmOrder.getId())
+                    .update();
         }
 
     }
