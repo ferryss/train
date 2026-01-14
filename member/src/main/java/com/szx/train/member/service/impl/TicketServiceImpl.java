@@ -43,7 +43,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
 
         IPage<Ticket> list = lambdaQuery()
                 .eq(req.getMemberId() != null, Ticket::getMemberId, req.getMemberId())
-                .orderByDesc(Ticket::getDate)
+                .orderByDesc(Ticket::getCreateTime)
                 .page(page);
 
         if(list.getRecords().isEmpty()){
