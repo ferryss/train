@@ -3,8 +3,6 @@ server:
   servlet:
     context-path: /business # 访问路径
 spring:
-  application:
-    name: business
   datasource:
     url: jdbc:mysql://192.168.100.128:3306/train-business?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     driver-class-name: com.mysql.cj.jdbc.Driver

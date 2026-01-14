@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: business
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        file-extension: yaml
+        server-addr: 192.168.100.128:8848
+        namespace: train
+      discovery:
+        server-addr: 192.168.100.128:8848
+        namespace: train
+
