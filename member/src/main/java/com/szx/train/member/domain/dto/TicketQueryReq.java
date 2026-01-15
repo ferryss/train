@@ -3,6 +3,7 @@ package com.szx.train.member.domain.dto;
 import com.szx.train.common.req.PageReq;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.time.LocalTime;
  * @author Ferry
  * @since 2026-01-11
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

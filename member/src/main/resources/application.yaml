@@ -13,6 +13,7 @@ mybatis-plus:
   configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 开发时建议开启看SQL
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+#    local-cache-scope: statement
   global-config:
     db-config:
       update-strategy: not_null
