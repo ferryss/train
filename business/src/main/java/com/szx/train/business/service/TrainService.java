@@ -22,6 +22,7 @@ import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,6 +103,7 @@ public class TrainService extends ServiceImpl<TrainMapper, Train> {
         return BeanUtil.copyProperties(byId, TrainQueryResp.class);
     }
 
+    @Cacheable(value = "TrainService_queryList")
     public List<TrainQueryResp> queryList() {
 
         List<Train> list = lambdaQuery()

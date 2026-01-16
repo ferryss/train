@@ -8,6 +8,19 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: train
     password: train
+  data:
+    redis:
+      host: 192.168.100.128
+      port: 6379
+      database: 0
+  #      password:
+  cache:
+    type: redis
+    redis:
+      use-key-prefix: true
+      key-prefix: train_cache_
+      cache-null-values: false
+      time-to-live: 60s
 
 mybatis-plus:
   configuration:
