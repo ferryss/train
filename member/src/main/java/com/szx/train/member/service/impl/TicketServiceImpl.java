@@ -12,6 +12,9 @@ import com.szx.train.member.domain.po.Ticket;
 import com.szx.train.member.domain.vo.TicketResp;
 import com.szx.train.member.mapper.TicketMapper;
 import com.szx.train.member.service.ITicketService;
+import io.seata.core.context.RootContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,7 +31,10 @@ import java.util.List;
 @Service
 public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> implements ITicketService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TicketServiceImpl.class);
+
     public void saveTicket(TicketReq req) {
+        LOG.info("seata全局事务ID为 {}", RootContext.getXID());
         LocalDateTime now = LocalDateTime.now();
         Ticket ticket = BeanUtil.copyProperties(req, Ticket.class);
 

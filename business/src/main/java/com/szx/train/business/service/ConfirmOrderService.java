@@ -31,12 +31,13 @@ import com.szx.train.common.req.TicketReq;
 import com.szx.train.common.resp.CommonResp;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
+import io.seata.core.context.RootContext;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -112,6 +113,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
         return BeanUtil.copyProperties(byId, ConfirmOrderQueryResp.class);
     }
+
 
     public void doConfirmOrder(ConfirmOrderDoReq  req) {
 
@@ -245,14 +247,20 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 .eq(StrUtil.isNotBlank(trainCode), DailyTrainTicket::getTrainCode, trainCode)
                 .list();
         ConfirmOrderService proxy = (ConfirmOrderService) AopContext.currentProxy();
-        proxy.afterDoConfirmOrder(finalSeatList, ticketList, tickets, start, end, confirmOrder);
+        try {
+            proxy.afterDoConfirmOrder(finalSeatList, ticketList, tickets, start, end, confirmOrder);
+        } catch (Exception e) {
+            LOG.error("保存购票信息失败", e);
+            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SAVE_ERROR);
+        }
 
     }
 
-    @Transactional
+    @GlobalTransactional
     public void afterDoConfirmOrder(ArrayList<DailyTrainSeat> finalSeatList, List<DailyTrainTicket> ticketList,
                                     List<ConfirmOrderTicketReq> tickets,
-                                    String start, String end, ConfirmOrder confirmOrder){
+                                    String start, String end, ConfirmOrder confirmOrder) throws Exception {
+        LOG.info("seata全局事务ID为 {}", RootContext.getXID());
         for (int i = 0; i < finalSeatList.size(); i++){
             DailyTrainSeat finalSeat = finalSeatList.get(i);
             DateTime now = DateTime.now();
@@ -308,14 +316,14 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
             ticketReq.setMemberId(LoginMemberContext.getId());
             ticketReq.setPassengerId(ticket.getPassengerId());
             ticketReq.setPassengerName(ticket.getPassengerName());
-            ticketReq.setDate(finalSeat.getDate());
+            ticketReq.setTrainDate(finalSeat.getDate());
             ticketReq.setTrainCode(finalSeat.getTrainCode());
             ticketReq.setCarriageIndex(finalSeat.getCarriageIndex());
-            ticketReq.setRow(finalSeat.getRow());
-            ticketReq.setCol(finalSeat.getCol());
-            ticketReq.setStart(start);
+            ticketReq.setSeatRow(finalSeat.getRow());
+            ticketReq.setSeatCol(finalSeat.getCol());
+            ticketReq.setStartStation(start);
             ticketReq.setStartTime(startTime);
-            ticketReq.setEnd(end);
+            ticketReq.setEndStation(end);
             ticketReq.setEndTime(endTime);
             ticketReq.setSeatType(finalSeat.getSeatType());
             CommonResp<Object> objectCommonResp = memberFeign.saveTicket(ticketReq);
@@ -328,6 +336,9 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     .set(ConfirmOrder::getStatus, ConfirmOrderStatusEnum.SUCCESS.getCode())
                     .eq(ConfirmOrder::getId, confirmOrder.getId())
                     .update();
+//            if(1 == 1){
+//                throw new Exception("测试异常");
+//            }
         }
 
     }

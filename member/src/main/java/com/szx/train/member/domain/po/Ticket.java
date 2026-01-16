@@ -1,7 +1,6 @@
 package com.szx.train.member.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -45,7 +44,7 @@ public class Ticket implements Serializable {
     private String passengerName;
 
     @Schema(description = "日期")
-    private LocalDate date;
+    private LocalDate trainDate;
 
     @Schema(description = "车次编号")
     private String trainCode;
@@ -54,21 +53,19 @@ public class Ticket implements Serializable {
     private Integer carriageIndex;
 
     @Schema(description = "序号|01，02")
-    @TableField("`row`")
-    private String row;
+    private String seatRow;
 
     @Schema(description = "列号|枚举[SeatColEnum]")
-    @TableField("`col`")
-    private String col;
+    private String seatCol;
 
     @Schema(description = "出发站")
-    private String start;
+    private String startStation;
 
     @Schema(description = "出发时间")
     private LocalTime startTime;
 
     @Schema(description = "到达站")
-    private String end;
+    private String endStation;
 
     @Schema(description = "到站时间")
     private LocalTime endTime;

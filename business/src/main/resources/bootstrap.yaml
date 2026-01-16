@@ -13,3 +13,12 @@ spring:
         server-addr: 192.168.100.128:8848
         namespace: train
 
+# seata配置
+seata:
+  tx-service-group: train_group
+  service:
+    vgroup-mapping:
+      train_group: default
+    grouplist:
+      default: 192.168.100.128:8099
+

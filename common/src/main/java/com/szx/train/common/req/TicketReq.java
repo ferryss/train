@@ -47,7 +47,7 @@ public class TicketReq implements Serializable {
     /**
      * 日期
      */
-    private Date date;
+    private Date trainDate;
 
     @NotBlank(message = "【车次编号】不能为空")
     /**
@@ -65,19 +65,19 @@ public class TicketReq implements Serializable {
     /**
      * 序号|01，02
      */
-    private String row;
+    private String seatRow;
 
     @NotBlank(message = "【列号】不能为空")
     /**
      * 列号|枚举[SeatColEnum]
      */
-    private String col;
+    private String seatCol;
 
     @NotBlank(message = "【出发站】不能为空")
     /**
      * 出发站
      */
-    private String start;
+    private String startStation;
 
     @NotNull(message = "【出发时间】不能为空")
     /**
@@ -89,7 +89,7 @@ public class TicketReq implements Serializable {
     /**
      * 到达站
      */
-    private String end;
+    private String endStation;
 
     @NotNull(message = "【到站时间】不能为空")
     /**

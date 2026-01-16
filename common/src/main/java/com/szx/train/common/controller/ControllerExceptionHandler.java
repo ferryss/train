@@ -1,8 +1,10 @@
 package com.szx.train.common.controller;
 
 
+import cn.hutool.core.util.StrUtil;
 import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.resp.CommonResp;
+import io.seata.core.context.RootContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.validation.BindException;
@@ -26,7 +28,12 @@ public class ControllerExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public CommonResp exceptionHandler(Exception e) {
+    public CommonResp exceptionHandler(Exception e) throws Exception {
+        // 如果是seata全局事务，则直接抛出, 避免调用方无法捕获异常
+        if(StrUtil.isNotBlank(RootContext.getXID())){
+            log.info("全局事务id: {}", RootContext.getXID());
+            throw e;
+        }
         CommonResp commonResp = new CommonResp();
         log.error("系统异常：", e);
         commonResp.setSuccess(false);
