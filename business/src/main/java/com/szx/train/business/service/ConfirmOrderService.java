@@ -336,6 +336,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                     .set(ConfirmOrder::getStatus, ConfirmOrderStatusEnum.SUCCESS.getCode())
                     .eq(ConfirmOrder::getId, confirmOrder.getId())
                     .update();
+            //Thread.sleep(10000);
 //            if(1 == 1){
 //                throw new Exception("测试异常");
 //            }
