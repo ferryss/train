@@ -10,6 +10,8 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -119,6 +121,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
     }
 
 
+    @SentinelResource(value = "doConfirmOrder", blockHandler = "doConfirmOrderBlock")
     public void doConfirmOrder(ConfirmOrderDoReq  req) {
         String lockKey = req.getDate() + "-" + req.getTrainCode();
 
@@ -569,5 +572,16 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 }
             }
         }
+    }
+
+
+    /**
+     * 降级方法
+     * @param req
+     * @param e
+     */
+    public void doConfirmOrderBlock(ConfirmOrderDoReq  req, FlowException e){
+        LOG.info("购票请求被限流 {}", req);
+        throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_FLOE_ERROR);
     }
 }
