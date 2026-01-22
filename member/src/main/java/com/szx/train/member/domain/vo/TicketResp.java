@@ -44,7 +44,7 @@ public class TicketResp implements Serializable {
     /**
      * 日期
      */
-    private LocalDate date;
+    private LocalDate trainDate;
 
     /**
      * 车次编号
@@ -59,17 +59,17 @@ public class TicketResp implements Serializable {
     /**
      * 序号|01，02
      */
-    private String row;
+    private String seatRow;
 
     /**
      * 列号|枚举[SeatColEnum]
      */
-    private String col;
+    private String seatCol;
 
     /**
      * 出发站
      */
-    private String start;
+    private String startStation;
 
     /**
      * 出发时间
@@ -79,7 +79,7 @@ public class TicketResp implements Serializable {
     /**
      * 到达站
      */
-    private String end;
+    private String endStation;
 
     /**
      * 到站时间

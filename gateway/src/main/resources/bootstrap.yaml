@@ -8,3 +8,17 @@ spring:
         namespace: train
       config:
         enabled: false
+    gateway:
+      routes:
+        - id: member
+          uri: lb://member
+          predicates:
+            - Path=/member/**
+        - id: business
+          uri: lb://business
+          predicates:
+            - Path=/business/**
+        - id: batch
+          uri: lb://batch
+          predicates:
+            - Path=/batch/**
