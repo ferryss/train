@@ -12,4 +12,24 @@ spring:
       discovery:
         server-addr: 192.168.100.128:8848
         namespace: train
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: 127.0.0.1:8090
+      datasource:
+        degrade:
+          nacos:
+            server-addr: 192.168.100.128:8848
+            namespace: train
+            group-id: DEFAULT_GROUP
+            data-id: sentinel-batch-degrade
+            rule-type: degrade
+
+# 通过sentinel监控feign
+feign:
+  sentinel:
+    enabled: true
+
+seata:
+  enabled: false
 
