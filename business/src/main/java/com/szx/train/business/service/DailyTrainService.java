@@ -39,6 +39,7 @@ public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain>
     private final DailyTrainCarriageService dailyTrainCarriageService;
     private final DailyTrainSeatService dailyTrainSeatService;
     private final DailyTrainTicketService dailyTicketService;
+    private final SkTokenService skTokenService;
 
     public void saveDailyTrain(DailyTrainSaveReq req) {
         LocalDateTime now = LocalDateTime.now();
@@ -138,6 +139,8 @@ public class DailyTrainService extends ServiceImpl<DailyTrainMapper, DailyTrain>
             dailyTrainSeatService.genDaily(date, trainCode, trainStationCount);
             // 5.生成每日车票数据
             dailyTicketService.genDaily(date, trainCode);
+            // 6.生成每日令牌数据
+            skTokenService.genDaily(date, trainCode, trainStationCount);
         }
 
         LOG.info("✅结束生成日期：【{}】车次数据", DateUtil.format(date, "yyyy-MM-dd"));

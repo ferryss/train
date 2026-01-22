@@ -1,22 +1,26 @@
 package com.szx.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.szx.train.business.domain.DailyTrainSeat;
 import com.szx.train.business.domain.SkToken;
 import com.szx.train.business.mapper.SkTokenMapper;
 import com.szx.train.business.req.SkTokenQueryReq;
 import com.szx.train.business.req.SkTokenReq;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,9 +32,41 @@ import java.util.List;
  * @since 2026-01-22
  */
 @Service
+@RequiredArgsConstructor
 public class SkTokenService extends ServiceImpl<SkTokenMapper, SkToken> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrainSeatService.class);
+
+    private final DailyTrainSeatService dailyTrainSeatService;
+    public void genDaily(Date date, String trainCode, Long trainStationCount) {
+        LOG.info("删除日期 【{}】车次【{}】的令牌记录", DateUtil.formatDate(date), trainCode);
+        lambdaUpdate()
+                .eq(SkToken::getDate, date)
+                .eq(SkToken::getTrainCode, trainCode)
+                .remove();
+
+        LocalDateTime now = LocalDateTime.now();
+        SkToken skToken = new SkToken();
+        skToken.setDate(date);
+        skToken.setTrainCode(trainCode);
+        skToken.setId(SnowUtil.getSnowflakeNextId());
+        skToken.setCreateTime(now);
+        skToken.setUpdateTime(now);
+
+        int seatCount = dailyTrainSeatService.lambdaQuery()
+                .eq(DailyTrainSeat::getDate, date)
+                .eq(DailyTrainSeat::getTrainCode, trainCode)
+                .count().intValue();
+        LOG.info("车次【{}】的座位数【{}】", trainCode, seatCount);
+
+        LOG.info("车次【{}】到站数【{}】", trainCode, trainStationCount);
+
+        int count = (int) (seatCount * trainStationCount * 3/4);
+        LOG.info("车次【{}】初始生成令牌数【{}】", trainCode, count);
+        skToken.setCount(count);
+
+        save(skToken);
+    }
 
     public void saveSkToken(SkTokenReq req) {
         LocalDateTime now = LocalDateTime.now();
