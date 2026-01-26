@@ -12,12 +12,17 @@ import com.szx.train.business.domain.SkToken;
 import com.szx.train.business.mapper.SkTokenMapper;
 import com.szx.train.business.req.SkTokenQueryReq;
 import com.szx.train.business.req.SkTokenReq;
+import com.szx.train.common.context.LoginMemberContext;
+import com.szx.train.common.exception.BusinessException;
+import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -43,6 +49,7 @@ public class SkTokenService extends ServiceImpl<SkTokenMapper, SkToken> {
     private final DailyTrainSeatService dailyTrainSeatService;
     private final SkTokenMapper skTokenMapper;
     private final SqlSessionFactory sqlSessionFactory;
+    private final RedissonClient redissonClient;
     public void genDaily(Date date, String trainCode, Long trainStationCount) {
         LOG.info("删除日期 【{}】车次【{}】的令牌记录", DateUtil.formatDate(date), trainCode);
         lambdaUpdate()
@@ -130,6 +137,24 @@ public class SkTokenService extends ServiceImpl<SkTokenMapper, SkToken> {
 
 
     public boolean validSkToken(Date date, String trainCode) {
+        LOG.info("查询日期【{}】车次【{}】的令牌余量", DateUtil.formatDate(date), trainCode);
+        Long memberId = LoginMemberContext.getId();
+
+        // 先获取令牌防止机器人刷票
+        String lockKey = DateUtil.formatDate(date) + "-" + trainCode + "-" + memberId;
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            boolean b = lock.tryLock(5, TimeUnit.SECONDS);
+            if(Boolean.TRUE.equals(b)){
+                LOG.info("获取令牌锁成功, lockKey: {}", lockKey);
+            }else{
+                LOG.info("获取令牌锁失败, lockKey: {}", lockKey);
+                throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_LOCK_FAIL);
+            }
+        } catch (InterruptedException e) {
+            LOG.error("获取令牌锁失败");
+        }
+
         // 使用Simple执行器获取准确影响行数
         try (SqlSession session = sqlSessionFactory.openSession(ExecutorType.SIMPLE)) {
             SkTokenMapper mapper = session.getMapper(SkTokenMapper.class);
