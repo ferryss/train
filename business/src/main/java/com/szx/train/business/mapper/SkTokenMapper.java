@@ -1,7 +1,10 @@
 package com.szx.train.business.mapper;
 
-import com.szx.train.business.domain.SkToken;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.szx.train.business.domain.SkToken;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface SkTokenMapper extends BaseMapper<SkToken> {
 
+    int decrease(@Param("date") Date date, @Param("trainCode") String trainCode);
 }

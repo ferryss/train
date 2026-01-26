@@ -15,6 +15,9 @@ import com.szx.train.business.req.SkTokenReq;
 import com.szx.train.common.resp.PageResp;
 import com.szx.train.common.util.SnowUtil;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,8 @@ public class SkTokenService extends ServiceImpl<SkTokenMapper, SkToken> {
     private static final Logger LOG = LoggerFactory.getLogger(TrainSeatService.class);
 
     private final DailyTrainSeatService dailyTrainSeatService;
+    private final SkTokenMapper skTokenMapper;
+    private final SqlSessionFactory sqlSessionFactory;
     public void genDaily(Date date, String trainCode, Long trainStationCount) {
         LOG.info("删除日期 【{}】车次【{}】的令牌记录", DateUtil.formatDate(date), trainCode);
         lambdaUpdate()
@@ -121,5 +126,17 @@ public class SkTokenService extends ServiceImpl<SkTokenMapper, SkToken> {
         }
 
         return BeanUtil.copyProperties(byId, SkToken.class);
+    }
+
+
+    public boolean validSkToken(Date date, String trainCode) {
+        // 使用Simple执行器获取准确影响行数
+        try (SqlSession session = sqlSessionFactory.openSession(ExecutorType.SIMPLE)) {
+            SkTokenMapper mapper = session.getMapper(SkTokenMapper.class);
+            int updateCount = mapper.decrease(date, trainCode);
+            session.commit();
+            LOG.info("影响行数{}", updateCount);
+            return updateCount > 0;
+        }
     }
 }

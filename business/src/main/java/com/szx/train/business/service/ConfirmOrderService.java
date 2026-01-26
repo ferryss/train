@@ -63,6 +63,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
     private final DailyTrainSeatService dailyTrainSeatService;
     private final MemberFeign memberFeign;
     private final RedissonClient redissonClient;
+    private final SkTokenService skTokenService;
 
     public void saveConfirmOrder(ConfirmOrderSaveReq req) {
 
@@ -123,6 +124,16 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
     @SentinelResource(value = "doConfirmOrder", blockHandler = "doConfirmOrderBlock")
     public void doConfirmOrder(ConfirmOrderDoReq  req) {
+        // 校验令牌余量
+        boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode());
+        if(validSkToken){
+            LOG.info("令牌余量校验成功");
+        }else{
+            LOG.info("令牌余量校验失败");
+            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_FAIL);
+        }
+
+
         String lockKey = req.getDate() + "-" + req.getTrainCode();
 
         RLock lock = null;

@@ -1,6 +1,7 @@
 package com.szx.train.business.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,6 +42,7 @@ public class SkToken implements Serializable {
     private String trainCode;
 
     @SchemaProperty(name = "令牌余量")
+    @TableField("`count`")
     private Integer count;
 
     @SchemaProperty(name = "新增时间")
