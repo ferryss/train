@@ -163,5 +163,21 @@ public class SkTokenService extends ServiceImpl<SkTokenMapper, SkToken> {
             LOG.info("影响行数{}", updateCount);
             return updateCount > 0;
         }
+
+        /*
+         改动
+         1.获取Redis中的令牌余量
+         2.如果缓存存在
+            (1)去更新Redis中的令牌余量，就是减1
+            (2)如果令牌余量小于0，返回false
+            (3)否则，增加过期时间，并且count % 5 = 0时，再去更新数据库，返回true
+         3.如果缓存不存在
+            (1)从数据库中查询令牌余量
+            (2)对其余量做判断，是否存在该令牌，数量是否大于0
+            (3)对结果做减1，增加缓存和更新数据库
+         */
+
+
+
     }
 }

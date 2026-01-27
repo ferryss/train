@@ -124,6 +124,10 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
     @SentinelResource(value = "doConfirmOrder", blockHandler = "doConfirmOrderBlock")
     public void doConfirmOrder(ConfirmOrderDoReq  req) {
+
+        // 校验验证码
+
+
         // 校验令牌余量
         boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode());
         if(validSkToken){
