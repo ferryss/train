@@ -3,6 +3,7 @@ package com.szx.train.business.controller;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.szx.train.business.req.ConfirmOrderDoReq;
+import com.szx.train.business.service.BeforeConfirmOrderService;
 import com.szx.train.business.service.ConfirmOrderService;
 import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.resp.CommonResp;
@@ -22,12 +23,12 @@ public class ConfirmOrderController {
     private static final Logger LOG = LoggerFactory.getLogger(ConfirmOrderService.class);
 
     @Resource
-    private ConfirmOrderService confirmOrderService;
+    private BeforeConfirmOrderService beforeconfirmOrderService;
 
     @SentinelResource(value = "confirmOrderDo", blockHandler = "doConfirmOrderBlock")
     @PostMapping("/do")
     public CommonResp<Object> save(@Valid @RequestBody ConfirmOrderDoReq req) {
-        confirmOrderService.doConfirmOrder(req);
+        beforeconfirmOrderService.beforeDoConfirmOrder(req);
         return new CommonResp<>();
     }
 

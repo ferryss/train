@@ -51,3 +51,8 @@ seata:
       username: nacos
       password: nacos
 
+rocketmq:
+  name-server: http://192.168.100.128:9876
+  producer:
+      group: default
+

@@ -9,7 +9,6 @@ import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -26,7 +25,6 @@ import com.szx.train.business.req.ConfirmOrderQueryReq;
 import com.szx.train.business.req.ConfirmOrderSaveReq;
 import com.szx.train.business.req.ConfirmOrderTicketReq;
 import com.szx.train.business.resp.ConfirmOrderQueryResp;
-import com.szx.train.common.context.LoginMemberContext;
 import com.szx.train.common.exception.BusinessException;
 import com.szx.train.common.exception.BusinessExceptionEnum;
 import com.szx.train.common.req.TicketReq;
@@ -125,17 +123,17 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
     @SentinelResource(value = "doConfirmOrder", blockHandler = "doConfirmOrderBlock")
     public void doConfirmOrder(ConfirmOrderDoReq  req) {
 
-        // 校验验证码
-
-
-        // 校验令牌余量
-        boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode());
-        if(validSkToken){
-            LOG.info("令牌余量校验成功");
-        }else{
-            LOG.info("令牌余量校验失败");
-            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_FAIL);
-        }
+//        // 校验验证码
+//
+//
+//        // 校验令牌余量
+//        boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode());
+//        if(validSkToken){
+//            LOG.info("令牌余量校验成功");
+//        }else{
+//            LOG.info("令牌余量校验失败");
+//            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_SK_TOKEN_FAIL);
+//        }
 
 
         String lockKey = req.getDate() + "-" + req.getTrainCode();
@@ -197,20 +195,35 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 LOG.info("余票不存在");
                 return;
             }
-
-            // （同乘客不可在 同车次 同时段 重复下单，）先不校验影响测试
-
-            // 保存确认订单
-            LocalDateTime nowTime  = LocalDateTime.now();
-            ConfirmOrder confirmOrder = BeanUtil.copyProperties(req, ConfirmOrder.class);
-            confirmOrder.setId(SnowUtil.getSnowflakeNextId());
-            confirmOrder.setMemberId(LoginMemberContext.getId());
-            confirmOrder.setTickets(JSONUtil.toJsonStr(tickets));
-            confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
-            confirmOrder.setCreateTime(nowTime);
-            confirmOrder.setUpdateTime(nowTime);
-
-            save(confirmOrder);
+//
+//            // （同乘客不可在 同车次 同时段 重复下单，）先不校验影响测试
+//
+//            // 保存确认订单
+//            LocalDateTime nowTime  = LocalDateTime.now();
+//            ConfirmOrder confirmOrder = BeanUtil.copyProperties(req, ConfirmOrder.class);
+//            confirmOrder.setId(SnowUtil.getSnowflakeNextId());
+//            confirmOrder.setMemberId(LoginMemberContext.getId());
+//            confirmOrder.setTickets(JSONUtil.toJsonStr(tickets));
+//            confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
+//            confirmOrder.setCreateTime(nowTime);
+//            confirmOrder.setUpdateTime(nowTime);
+//
+//            save(confirmOrder);
+            ConfirmOrder confirmOrder = new ConfirmOrder();
+            List<ConfirmOrder> list = lambdaQuery()
+                    .eq(ConfirmOrder::getDate, date)
+                    .eq(ConfirmOrder::getTrainCode, trainCode)
+                    .eq(ConfirmOrder::getMemberId, memberId)
+                    .eq(ConfirmOrder::getStatus, ConfirmOrderStatusEnum.INIT.getCode())
+                    .orderByAsc(ConfirmOrder::getId)
+                    .list();
+            if(CollUtil.isEmpty(list)){
+                LOG.info("找不到原始订单");
+                return;
+            }else{
+                LOG.info("找到{}条原始订单：", list.size());
+                confirmOrder = list.get(0);
+            }
 
             // 拿到余票数量做预扣减
             reduceCount(tickets, trainTicket);
@@ -357,7 +370,7 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
 
             // 用户的车票新增
             TicketReq ticketReq = new TicketReq();
-            ticketReq.setMemberId(LoginMemberContext.getId());
+            ticketReq.setMemberId(confirmOrder.getMemberId());
             ticketReq.setPassengerId(ticket.getPassengerId());
             ticketReq.setPassengerName(ticket.getPassengerName());
             ticketReq.setTrainDate(finalSeat.getDate());
