@@ -508,7 +508,8 @@ public class ConfirmOrderService extends ServiceImpl<ConfirmOrderMapper, Confirm
                 boolean isAlreadyChoose = false;
                 // 判断座位是否预选定
                 for(DailyTrainSeat finalSeat : finalSeatList){
-                    if(curSeatIndex.equals(finalSeat.getCarriageSeatIndex())){
+                    if(curSeatIndex.equals(finalSeat.getCarriageSeatIndex()) &&
+                            dailyTrainCarriage.getIndex().equals(finalSeat.getCarriageIndex()) ){
                         LOG.info("座位 {} 已被预选", curSeatIndex);
                         isAlreadyChoose = true;
                         break;
